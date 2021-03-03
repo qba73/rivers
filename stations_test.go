@@ -7,8 +7,11 @@ import (
 )
 
 func TestLoadStations(t *testing.T) {
+	path := "testdata/stations.json"
 
-	data, err := rivers.LoadStations("testdata/stations.json")
+	var stations rivers.Stations
+
+	err := rivers.LoadStations(path, &stations)
 
 	if err != nil {
 		t.Fatalf("can't read data file")
@@ -16,7 +19,7 @@ func TestLoadStations(t *testing.T) {
 
 	t.Run("Station number", func(t *testing.T) {
 		wantStationsNumber := 444
-		gotStationsNumber := len(data.Features)
+		gotStationsNumber := len(stations.Features)
 
 		if gotStationsNumber != wantStationsNumber {
 			t.Errorf("got: %d, want: %d", gotStationsNumber, wantStationsNumber)
@@ -26,7 +29,7 @@ func TestLoadStations(t *testing.T) {
 	t.Run("Coordinate system", func(t *testing.T) {
 		want := "EPSG:4326"
 
-		got := data.Crs.Properties.Name
+		got := stations.Crs.Properties.Name
 
 		if got != want {
 			t.Errorf("got: %s, want: %s", got, want)

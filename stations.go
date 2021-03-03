@@ -2,16 +2,19 @@ package rivers
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"io"
+	"os"
+	"sync"
 )
+
+var mu sync.Mutex
 
 // Stations represents geojson data describing
 // all gauge stations and coordinates data.
 type Stations struct {
 	Type string `json:"type"`
 	Crs  struct {
-		Type       string
+		Type       string `json:"type"`
 		Properties struct {
 			Name string `json:"name"`
 		} `json:"properties"`
@@ -42,18 +45,22 @@ type Station struct {
 	} `json:"properties"`
 }
 
+var Unmarshal = func(r io.Reader, v interface{}) error {
+	return json.NewDecoder(r).Decode(v)
+}
+
 // LoadStations knows how to read stations json file.
 // It returns a struct Stations with gauge stations known as
 // geographical 'Features' (GIS terminology).
-func LoadStations(filename string) (Stations, error) {
-	var stations Stations
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return Stations{}, fmt.Errorf("error reading file: %s", filename)
-	}
+func LoadStations(path string, v interface{}) error {
+	mu.Lock()
+	defer mu.Unlock()
 
-	if err := json.Unmarshal(data, &stations); err != nil {
-		return Stations{}, fmt.Errorf("error unmarshalling stations")
+	f, err := os.Open(path)
+	if err != nil {
+		return err
 	}
-	return stations, nil
+	defer f.Close()
+
+	return Unmarshal(f, v)
 }
