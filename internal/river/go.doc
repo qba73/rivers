@@ -1,0 +1,4 @@
+// Package river provides functionality for uploading
+// and searching water temperature and water level data
+// obtained from gauges installed in rivers in Ireland.
+package river
