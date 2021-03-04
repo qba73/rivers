@@ -1,17 +1,17 @@
-package rivers_test
+package river_test
 
 import (
 	"testing"
 
-	"github.com/qba73/rivers"
+	"github.com/qba73/rivers/internal/river"
 )
 
 func TestLoadStations(t *testing.T) {
 	path := "testdata/stations.json"
 
-	var stations rivers.Stations
+	var stations river.Stations
 
-	err := rivers.LoadStations(path, &stations)
+	err := river.LoadStations(path, &stations)
 
 	if err != nil {
 		t.Fatalf("can't read data file")
