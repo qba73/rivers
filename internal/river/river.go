@@ -1,5 +1,3 @@
-// Package rivers provides functionality
-// for manipulating time series data.
 package river
 
 import (
@@ -61,8 +59,8 @@ func LoadCSV(filename string) ([]Level, error) {
 	return levels, nil
 }
 
-// fixDate is a helper function that make
-// date format compatible with RFC3339.
+// fixDate is a helper function that makes date field
+// compliant with RFC3339.
 func fixDate(s string) string {
 	var date, time string
 	fmt.Sscanf(s, "%s %s", &date, &time)
