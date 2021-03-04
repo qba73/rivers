@@ -1,16 +1,16 @@
-package rivers_test
+package river_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/qba73/rivers"
+	"github.com/qba73/rivers/internal/river"
 )
 
 func TestLoadCSV(t *testing.T) {
 
-	data, err := rivers.LoadCSV("testdata/data.csv")
+	data, err := river.LoadCSV("testdata/data.csv")
 
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +28,7 @@ func TestLoadCSV(t *testing.T) {
 	}
 	wantValue := 1.772
 
-	want := rivers.Level{
+	want := river.Level{
 		Timestamp: wantTimestamp,
 		Value:     wantValue,
 	}

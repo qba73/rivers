@@ -1,6 +1,6 @@
 // Package rivers provides functionality
 // for manipulating time series data.
-package rivers
+package river
 
 import (
 	"bytes"
@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-// Level ...
+// Level represents water level
+// and
 type Level struct {
 	Timestamp time.Time
 	Value     float64
@@ -57,13 +58,11 @@ func LoadCSV(filename string) ([]Level, error) {
 
 		levels = append(levels, l)
 	}
-
 	return levels, nil
-
 }
 
-// fixDate is a helper function that fixes
-// incorrect date format coming in the csv file.
+// fixDate is a helper function that make
+// date format compatible with RFC3339.
 func fixDate(s string) string {
 	var date, time string
 	fmt.Sscanf(s, "%s %s", &date, &time)
