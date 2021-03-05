@@ -136,6 +136,9 @@ func TestStations(t *testing.T) {
 
 		wantFeature := river.Feature{Type: "Feature", Properties: river.Property{Name: "Moyles Mill", Ref: "0000006011"}, Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.596077, 54.011574}}}
 
+		if !cmp.Equal(got, wantFeature) {
+			t.Errorf("GetFeatureByRef(%s) \n%s", ref, cmp.Diff(got, wantFeature))
+		}
 	})
 
 }
