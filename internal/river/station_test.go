@@ -116,7 +116,17 @@ func TestStations(t *testing.T) {
 		if !cmp.Equal(got, wantFeatures) {
 			t.Errorf("GetAllFeatures() got error \n%s", cmp.Diff(got, wantFeatures))
 		}
+	})
 
+	t.Run("Retrieve feature by name", func(t *testing.T) {
+		station := "Glaslough"
+		got := s.GetFeatureByName(station)
+
+		wantFeature := river.Feature{Type: "Feature", Properties: river.Property{Name: "Glaslough", Ref: "0000003055"}, Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}}}
+
+		if !cmp.Equal(got, wantFeature) {
+			t.Errorf("GetFeatureByName(%s) \n%s", station, cmp.Diff(got, wantFeature))
+		}
 	})
 
 }
