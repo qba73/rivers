@@ -44,6 +44,7 @@ type Feature struct {
 	} `json:"geometry"`
 }
 
+// Station represent a measurement station with installed gauge.
 type Station struct {
 	RefNo       string `json:"station_ref"`
 	Name        string `json:"station_name"`
@@ -64,16 +65,20 @@ type Stations struct {
 	Features []Feature `json:"features"`
 }
 
-// GetAll ...
-func (s Stations) GetAll() ([]Feature, error) {
-	return []Feature{}, nil
+// GetAllFeatures ...
+func (s Stations) GetAllFeatures() ([]Feature, error) {
+	var features []Feature
+
+	return features, nil
 }
 
-// GetByName
-func (s Stations) GetByName(n string) ([]Feature, error) {
-	return []Feature{}, nil
+// GetAllStations ...
+func (s Stations) GetAllStations() ([]Station, error) {
+	var stations []Station
+	return stations, nil
 }
 
-// GetById
-
-// GetByGroup
+// GetFeatureByName ...
+func (s Stations) GetFeatureByName(name string) ([]Feature, error) {
+	return []Feature{}, nil
+}
