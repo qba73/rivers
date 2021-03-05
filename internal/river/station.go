@@ -31,17 +31,32 @@ func LoadStations(path string, v interface{}) error {
 	return Unmarshal(f, v)
 }
 
+// ReadStations ...
+func ReadStations(r io.Reader) (Stations, error) {
+	var s Stations
+	if err := Unmarshal(r, &s); err != nil {
+		return Stations{}, err
+	}
+	return s, nil
+}
+
 // Feature represents a single gauge.
 type Feature struct {
-	Type       string `json:"type"`
-	Properties struct {
-		Name string `json:"name"`
-		Ref  string `json:"ref"`
-	} `json:"properties"`
-	Geometry struct {
-		Type        string    `json:"type"`
-		Coordinates []float64 `json:"coordinates"`
-	} `json:"geometry"`
+	Type       string   `json:"type"`
+	Properties Property `json:"properties"`
+	Geometry   Geometry `json:"geometry"`
+}
+
+// Property represents properties of agauge station.
+type Property struct {
+	Name string `json:"name"`
+	Ref  string `json:"ref"`
+}
+
+// Geometry represents geometry coordinates of a gauge station.
+type Geometry struct {
+	Type        string    `json:"type"`
+	Coordinates []float64 `json:"coordinates"`
 }
 
 // Station represent a measurement station with installed gauge.
@@ -66,19 +81,22 @@ type Stations struct {
 }
 
 // GetAllFeatures ...
-func (s Stations) GetAllFeatures() ([]Feature, error) {
-	var features []Feature
+func (s Stations) GetAllFeatures() []Feature {
+	return s.Features
+}
 
-	return features, nil
+// GetFeatureByName ...
+func (s Stations) GetFeatureByName(name string) Feature {
+	for _, f := range s.Features {
+		if f.Properties.Name == name {
+			return f
+		}
+	}
+	return Feature{}
 }
 
 // GetAllStations ...
 func (s Stations) GetAllStations() ([]Station, error) {
 	var stations []Station
 	return stations, nil
-}
-
-// GetFeatureByName ...
-func (s Stations) GetFeatureByName(name string) ([]Feature, error) {
-	return []Feature{}, nil
 }
