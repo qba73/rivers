@@ -31,3 +31,8 @@ test: ## Run unit tests
 tidy: ## Run go mod tidy and vendor
 	go mod tidy
 	go mod vendor
+
+# Rivers API
+
+runapi: ## Run Rivers API Server locally
+	go run cmd/rivers-api/main.go

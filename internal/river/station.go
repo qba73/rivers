@@ -85,10 +85,23 @@ func (s Stations) GetAllFeatures() []Feature {
 	return s.Features
 }
 
-// GetFeatureByName ...
+// GetFeatureByName takes a feature (station) name and
+// returns the Feature struct. If provided name is not
+// found it returns an empty Feature.
 func (s Stations) GetFeatureByName(name string) Feature {
 	for _, f := range s.Features {
 		if f.Properties.Name == name {
+			return f
+		}
+	}
+	return Feature{}
+}
+
+// GetFeatureByRef takes feature reference number and returns
+// matching feature. Othervise it returns an empty Feature struct.
+func (s Stations) GetFeatureByRef(ref string) Feature {
+	for _, f := range s.Features {
+		if f.Properties.Ref == ref {
 			return f
 		}
 	}

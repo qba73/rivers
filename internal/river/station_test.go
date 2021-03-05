@@ -129,4 +129,13 @@ func TestStations(t *testing.T) {
 		}
 	})
 
+	t.Run("Retrieve feature by refid", func(t *testing.T) {
+		ref := "0000006011"
+
+		got := s.GetFeatureByRef(ref)
+
+		wantFeature := river.Feature{Type: "Feature", Properties: river.Property{Name: "Moyles Mill", Ref: "0000006011"}, Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.596077, 54.011574}}}
+
+	})
+
 }
