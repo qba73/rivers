@@ -1,33 +1,43 @@
 package river
 
 import (
-	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"os"
 	"strconv"
 	"time"
 )
 
-// Level represents water level
-// and
+// Level represents water level recorded
+// by a gauge at the particular time.
 type Level struct {
 	Timestamp time.Time
 	Value     float64
 }
 
-// LoadCSV ...
-func LoadCSV(filename string) ([]Level, error) {
-	data, err := ioutil.ReadFile(filename)
+// LoadCSV knows how to open and read given csv file.
+// The csv file
+func LoadCSV(path string) ([]Level, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
+	return ReadCSV(f)
+}
 
-	r := csv.NewReader(bytes.NewReader(data))
-	// We are not interested in the CSV header, So, read it
-	// before start looping through the lines.
+// ReadCSV knows how to read a csv file containing
+// readings from a gauge in a format:
+// timestamp,level
+func ReadCSV(csvFile io.Reader) ([]Level, error) {
+	var levels []Level
+
+	r := csv.NewReader(csvFile)
+	// We are not interested in the CSV header. We read it
+	// before start looping through the lines (records).
 	if _, err := r.Read(); err != nil {
-		return nil, fmt.Errorf("error when reading csv file: %s", filename)
+		return nil, errors.New("error when reading csv file")
 	}
 
 	records, err := r.ReadAll()
@@ -35,33 +45,49 @@ func LoadCSV(filename string) ([]Level, error) {
 		return nil, err
 	}
 
-	var levels []Level
-
 	for _, r := range records {
-		tm := fixDate(r[0])
-		t, err := time.Parse(time.RFC3339, tm)
+		level, err := processRecord(r)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error processing csv record: %v", err)
 		}
-
-		val, err := strconv.ParseFloat(r[1], 64)
-		if err != nil {
-			return nil, err
-		}
-
-		l := Level{
-			Timestamp: t,
-			Value:     val,
-		}
-
-		levels = append(levels, l)
+		levels = append(levels, level)
 	}
 	return levels, nil
 }
 
-// fixDate is a helper function that makes date field
+func processRecord(r []string) (Level, error) {
+	tm, err := processTimestamp(r)
+	if err != nil {
+		return Level{}, err
+	}
+	val, err := processValue(r)
+	if err != nil {
+		return Level{}, err
+	}
+
+	return Level{Timestamp: tm, Value: val}, nil
+}
+
+func processTimestamp(record []string) (time.Time, error) {
+	ft := fixTimestamp(record[0])
+	tm, err := time.Parse(time.RFC3339, ft)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return tm, nil
+}
+
+func processValue(record []string) (float64, error) {
+	val, err := strconv.ParseFloat(record[1], 64)
+	if err != nil {
+		return 0, nil
+	}
+	return val, nil
+}
+
+// fixTimeStampo is a helper function that makes date field
 // compliant with RFC3339.
-func fixDate(s string) string {
+func fixTimestamp(s string) string {
 	var date, time string
 	fmt.Sscanf(s, "%s %s", &date, &time)
 	return fmt.Sprintf("%sT%s:00Z", date, time)
