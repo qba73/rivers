@@ -23,6 +23,35 @@ func cleanup(file *os.File) {
 	os.Remove(file.Name())
 }
 
+func TestLoadCSV(t *testing.T) {
+	t.Run("Load correct file", func(t *testing.T) {
+		testFile := "testdata/data.csv"
+		got, err := river.LoadCSV(testFile)
+		if err != nil {
+			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err )
+		}
+
+		wantLen := 96
+		if wantLen != len(got) {
+			t.Errorf("got: %d, want: %d", len(got), wantLen)
+		}
+	})
+
+	t.Run("Load not existing file", func(t *testing.T){
+		testFile := "testdata/notexisting.csv"
+		expectedErr := true
+
+		got, err := river.LoadCSV(testFile)
+		if (err != nil) != expectedErr {
+			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err )
+		}
+
+		if !expectedErr && (got != nil) {
+			t.Errorf("got %v, want nil", got)
+		}
+	})
+}
+
 func TestReadCSV(t *testing.T) {
 	file := setup(t)
 	defer cleanup(file)
@@ -57,8 +86,4 @@ func TestReadCSV(t *testing.T) {
 	if !cmp.Equal(want, data[0]) {
 		t.Errorf(cmp.Diff(want, data[0]))
 	}
-}
-
-func TestLoadCSV(t *testing.T) {
-
 }

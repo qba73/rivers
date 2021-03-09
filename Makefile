@@ -26,6 +26,7 @@ cover: ## Run unit tests and generate test coverage report
 
 test: ## Run unit tests
 	go test ./internal/... -v
+	staticcheck ./...
 
 # MODULES
 tidy: ## Run go mod tidy and vendor

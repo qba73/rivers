@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	// GaugeTimeFormat represents formatted time field in csv data files.
+	GaugeTimeFormat = "2006-01-02 15:04"
+)
+
 // Level represents water level recorded
 // by a gauge at the particular time.
 type Level struct {
@@ -18,12 +23,13 @@ type Level struct {
 }
 
 // LoadCSV knows how to open and read given csv file.
-// The csv file
+// Upon successful run it returns a slice of level structs.
 func LoadCSV(path string) ([]Level, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	return ReadCSV(f)
 }
 
@@ -69,8 +75,7 @@ func processRecord(r []string) (Level, error) {
 }
 
 func processTimestamp(record []string) (time.Time, error) {
-	ft := fixTimestamp(record[0])
-	tm, err := time.Parse(time.RFC3339, ft)
+	tm, err := time.Parse(GaugeTimeFormat, record[0])
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -83,12 +88,4 @@ func processValue(record []string) (float64, error) {
 		return 0, nil
 	}
 	return val, nil
-}
-
-// fixTimeStampo is a helper function that makes date field
-// compliant with RFC3339.
-func fixTimestamp(s string) string {
-	var date, time string
-	fmt.Sscanf(s, "%s %s", &date, &time)
-	return fmt.Sprintf("%sT%s:00Z", date, time)
 }
