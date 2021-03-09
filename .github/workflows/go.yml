@@ -18,7 +18,7 @@ jobs:
           go-version: 1.16
 
       - name: Test
-        run: got test -v ./... -coverprofile=c.out
+        run: go test -v ./... -coverprofile=c.out
 
       - name: Code coverage
         uses: paambaati/codeclimate-action@v2.5.7
