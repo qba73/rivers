@@ -28,7 +28,7 @@ func TestLoadCSV(t *testing.T) {
 		testFile := "testdata/data.csv"
 		got, err := river.LoadCSV(testFile)
 		if err != nil {
-			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err )
+			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
 		}
 
 		wantLen := 96
@@ -37,13 +37,13 @@ func TestLoadCSV(t *testing.T) {
 		}
 	})
 
-	t.Run("Load not existing file", func(t *testing.T){
+	t.Run("Load not existing file", func(t *testing.T) {
 		testFile := "testdata/notexisting.csv"
 		expectedErr := true
 
 		got, err := river.LoadCSV(testFile)
 		if (err != nil) != expectedErr {
-			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err )
+			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
 		}
 
 		if !expectedErr && (got != nil) {

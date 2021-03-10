@@ -25,7 +25,7 @@ cover: ## Run unit tests and generate test coverage report
 	staticcheck ./...
 
 test: ## Run unit tests
-	go test ./internal/... -v
+	go test -v ./internal/... -count=1
 	staticcheck ./...
 
 # MODULES

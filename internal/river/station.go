@@ -4,39 +4,29 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"sync"
 )
 
-var mu sync.Mutex
-
-// Unmarshal knows how to unmarshal data from the reader
-// into the specified value.
-var Unmarshal = func(r io.Reader, v interface{}) error {
-	return json.NewDecoder(r).Decode(v)
-}
-
 // LoadStations knows how to read stations json file.
-// It returns a struct Stations with gauge stations known as
-// geographical 'Features' (GIS terminology).
-func LoadStations(path string, v interface{}) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	f, err := os.Open(path)
+// It takes a path to the json file and returns
+// a struct Stations identified as geographical
+// 'Features' in GeoJSON terms.
+func LoadStations(name string) (Stations, error) {
+	f, err := os.Open(name)
 	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return Unmarshal(f, v)
-}
-
-// ReadStations ...
-func ReadStations(r io.Reader) (Stations, error) {
-	var s Stations
-	if err := Unmarshal(r, &s); err != nil {
 		return Stations{}, err
 	}
+	defer f.Close()
+	return ReadStations(f)
+}
+
+// ReadStations knows how to unmarshal stations.
+func ReadStations(r io.Reader) (Stations, error) {
+	var s Stations
+
+	if err := json.NewDecoder(r).Decode(&s); err != nil {
+		return Stations{}, err
+	}
+
 	return s, nil
 }
 
@@ -47,10 +37,18 @@ type Feature struct {
 	Geometry   Geometry `json:"geometry"`
 }
 
-// Property represents properties of agauge station.
+// Property represents properties of a single
+// gauge station.
 type Property struct {
-	Name string `json:"name"`
-	Ref  string `json:"ref"`
+	StationRef  string `json:"station_ref"`
+	StationName string `json:"station_name"`
+	SensorRef   string `json:"sensor_ref"`
+	RegionID    int    `json:"region_id"`
+	Timestamp   string `json:"datetime"`
+	Value       string `json:"value"`
+	ErrCode     int    `json:"err_code"`
+	URL         string `json:"url"`
+	CSVFile     string `json:"csv_file"`
 }
 
 // Geometry represents geometry coordinates of a gauge station.
@@ -80,36 +78,52 @@ type Stations struct {
 	Features []Feature `json:"features"`
 }
 
-// GetAllFeatures ...
-func (s Stations) GetAllFeatures() []Feature {
-	return s.Features
+// GetAll ...
+func (s Stations) GetAll() Stations {
+	return s
 }
 
-// GetFeatureByName takes a feature (station) name and
+// GetByName takes a feature (station) name and
 // returns the Feature struct. If provided name is not
 // found it returns an empty Feature.
-func (s Stations) GetFeatureByName(name string) Feature {
+func (s Stations) GetByName(name string) Stations {
+	var features []Feature
+
 	for _, f := range s.Features {
-		if f.Properties.Name == name {
-			return f
+		if f.Properties.StationName == name {
+			features = append(features, f)
 		}
 	}
-	return Feature{}
+	s.Features = features
+	return s
 }
 
-// GetFeatureByRef takes feature reference number and returns
-// matching feature. Othervise it returns an empty Feature struct.
-func (s Stations) GetFeatureByRef(ref string) Feature {
+// GetByStationRef takes station ID and returns
+// matching features (stations). If Station Ref number does
+// not exist it returns Stations struct with empty list of
+// Features (stations/sensors).
+func (s Stations) GetByStationRef(ref string) Stations {
+	var features []Feature
+
 	for _, f := range s.Features {
-		if f.Properties.Ref == ref {
-			return f
+		if f.Properties.StationRef == ref {
+			features = append(features, f)
 		}
 	}
-	return Feature{}
+	s.Features = features
+	return s
 }
 
-// GetAllStations ...
-func (s Stations) GetAllStations() ([]Station, error) {
-	var stations []Station
-	return stations, nil
+// GetBySensorRef takes sensor ID and returns matching features
+// (stations). If the sensor ID doesn't exist it returns Stations
+// struct with an empty list of Fetures (stations/sensors).
+func (s Stations) GetBySensorRef(ref string) Stations {
+	var features []Feature
+	for _, f := range s.Features {
+		if f.Properties.SensorRef == ref {
+			features = append(features, f)
+		}
+	}
+	s.Features = features
+	return s
 }

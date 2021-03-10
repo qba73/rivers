@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": { "name": "EPSG:4326" }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Sandy Mills", "ref": "0000001041" },
+      "geometry": { "type": "Point", "coordinates": [-7.575758, 54.838318] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ballybofey", "ref": "0000001043" },
+      "geometry": { "type": "Point", "coordinates": [-7.790749, 54.799769] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Glaslough", "ref": "0000003055" },
+      "geometry": { "type": "Point", "coordinates": [-6.894344, 54.323281] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Cappog Bridge", "ref": "0000003058" },
+      "geometry": { "type": "Point", "coordinates": [-7.021297, 54.266809] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Moyles Mill", "ref": "0000006011" },
+      "geometry": { "type": "Point", "coordinates": [-6.596077, 54.011574] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Clarebane", "ref": "0000006012" },
+      "geometry": { "type": "Point", "coordinates": [-6.666056, 54.092856] }
+    }
+  ]
+}
