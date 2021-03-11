@@ -127,3 +127,16 @@ func (s Stations) GetByStationAndSensorRef(station, sensor string) Stations {
 	s.Features = features
 	return s
 }
+
+// GetByRegionID knows how to return stations assigned
+// to the given region identified by regionID.
+func (s Stations) GetByRegionID(regionID int) Stations {
+	var features []Feature
+	for _, f := range s.Features {
+		if f.Properties.RegionID == regionID {
+			features = append(features, f)
+		}
+	}
+	s.Features = features
+	return s
+}

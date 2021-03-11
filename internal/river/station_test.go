@@ -445,4 +445,16 @@ func TestStations(t *testing.T) {
 			t.Errorf("GetByStationAndSensorRef(%s, %s) got error: \n%s", stationRef, sensorRef, cmp.Diff(got.Features, wantFeatures))
 		}
 	})
+
+	t.Run("Get features by group ID", func(t *testing.T) {
+		regionID := 10
+		got := s.GetByRegionID(regionID)
+
+		wantLen := 5
+		gotLen := len(got.Features)
+
+		if gotLen != wantLen {
+			t.Errorf("GetByRegionID(%d) got: %d, want: %d", regionID, gotLen, wantLen)
+		}
+	})
 }
