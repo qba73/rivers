@@ -8,15 +8,15 @@ import (
 	"github.com/qba73/rivers/internal/river"
 )
 
-/*
-func setupStationFile(t *testing.T) *os.File {
-	return testhelper.TmpStationTestFile(t, ".", "st.json")
+// setupStationFile is a helper function for opening
+// a test file with data.
+func setupStationFile(t *testing.T, name string) *os.File {
+	f, err := os.Open(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return f
 }
-
-func cleanupStationsFile(file *os.File) {
-	os.Remove(file.Name())
-}
-*/
 
 var testFeatures = []river.Feature{
 	{
@@ -244,10 +244,7 @@ func TestLoadJSON(t *testing.T) {
 }
 
 func TestReadStations(t *testing.T) {
-	f, err := os.Open("testdata/stationstest.json")
-	if err != nil {
-		t.Fatalf("error opening temp test file: %s", err)
-	}
+	f := setupStationFile(t, "testdata/stationstest.json")
 	defer f.Close()
 
 	s, err := river.ReadStations(f)
@@ -268,11 +265,7 @@ func TestReadStations(t *testing.T) {
 }
 
 func TestStations(t *testing.T) {
-	testFile := "testdata/latesttest.json"
-	f, err := os.Open(testFile)
-	if err != nil {
-		t.Fatalf("error opening temp test file: %s", err)
-	}
+	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
 	s, err := river.ReadStations(f)
@@ -418,33 +411,38 @@ func TestStations(t *testing.T) {
 			t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
 		}
 	})
+
+	t.Run("Get feature by station and sensor ref", func(t *testing.T) {
+		stationRef := "0000003055"
+		sensorRef := "0003"
+		got := s.GetByStationAndSensorRef(stationRef, sensorRef)
+
+		wantLen := 1
+		gotLen := len(got.Features)
+
+		if gotLen != wantLen {
+			t.Errorf("GetByStationAndSensorRef(%s, %s), got: %d, want: %d", stationRef, sensorRef, gotLen, wantLen)
+		}
+
+		wantFeatures := []river.Feature{
+			{
+				Type: "Feature",
+				Properties: river.Property{
+					StationRef:  "0000003055",
+					StationName: "Glaslough",
+					SensorRef:   "0003",
+					RegionID:    10,
+					Timestamp:   "2021-02-18T05:00:00Z",
+					Value:       "12.800",
+					ErrCode:     99,
+					URL:         "/0000003055/0003/",
+					CSVFile:     "/data/month/03055_0003.csv",
+				},
+				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			}}
+
+		if !cmp.Equal(got.Features, wantFeatures) {
+			t.Errorf("GetByStationAndSensorRef(%s, %s) got error: \n%s", stationRef, sensorRef, cmp.Diff(got.Features, wantFeatures))
+		}
+	})
 }
-
-/*
-func TestStationsGetBySensorRef(t *testing.T) {
-	t.Parallel()
-
-	fl := setupStationFile(t)
-	defer cleanupStationsFile(fl)
-
-	f, err := os.Open(fl.Name())
-	if err != nil {
-		t.Errorf("error creating file: %s", err)
-	}
-
-	s, err := river.ReadStations(f)
-	if err != nil {
-		t.Fatalf("error when reading stations: %s", err)
-	}
-
-	got := s.GetBySensorRef("0003")
-
-	wantLen := 1
-	gotLen := len(got.Features)
-
-	if gotLen != wantLen {
-		t.Errorf("GetBySensorRef(%s), got: %d, want: %d", "0003", gotLen, wantLen)
-	}
-
-}
-*/

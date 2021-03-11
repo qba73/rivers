@@ -114,13 +114,13 @@ func (s Stations) GetByStationRef(ref string) Stations {
 	return s
 }
 
-// GetBySensorRef takes sensor ID and returns matching features
+// GetByStationAndSensorRef takes sensor ID and returns matching features
 // (stations). If the sensor ID doesn't exist it returns Stations
 // struct with an empty list of Fetures (stations/sensors).
-func (s Stations) GetBySensorRef(ref string) Stations {
+func (s Stations) GetByStationAndSensorRef(station, sensor string) Stations {
 	var features []Feature
 	for _, f := range s.Features {
-		if f.Properties.SensorRef == ref {
+		if f.Properties.StationRef == station && f.Properties.SensorRef == sensor {
 			features = append(features, f)
 		}
 	}
