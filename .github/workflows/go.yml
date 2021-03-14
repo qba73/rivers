@@ -27,6 +27,7 @@ jobs:
         uses: paambaati/codeclimate-action@v2.5.7
         env:
           CC_TEST_REPORTER_ID: ${{secrets.TEST_REPORTER_ID}}
+          GITHUB_REF: ${GITHUB_REF##*/}
         with:
           coverageCommand: go tool cover -func=c.out
           debug: true
