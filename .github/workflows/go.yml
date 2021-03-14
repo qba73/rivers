@@ -24,6 +24,3 @@ jobs:
         uses: paambaati/codeclimate-action@v2.5.7
         env:
           CC_TEST_REPORTER_ID: b4ed4bd07174cfdde53c99b916ed25087cee93bfeb92c17c5720df4b73b470b0
-        with:
-          coverageCommand: go tool cover -html=c.out -o coverage.html
-          debug: true
