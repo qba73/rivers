@@ -68,7 +68,7 @@ _before-cc:
 		"curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter"
 	
 	# Make reporter executable
-	docker run -w /app -v ${ROOT}:/app ${GOLANG_DOCKER_IMAGE} chmod +x ./cc-test-reporter
+	docker run -w /app -v ${ROOT}:/app ${GO_DOCKER_IMAGE} chmod +x ./cc-test-reporter
 
 	# Run before build
 	docker run -w /app -v ${ROOT}:/app \
