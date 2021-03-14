@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Branch name
         run: echo running on branch ${GITHUB_REF##*/}
-        
+
       - uses: actions/checkout@v2
 
       - name: Set up Go
@@ -21,13 +21,13 @@ jobs:
           go-version: 1.16
 
       - name: Test
-        run: go test -v ./... -covermode=count -coverprofile=c.out
+        run: go test -v ./... -coverprofile=./c.out
 
       - name: Code coverage
         uses: paambaati/codeclimate-action@v2.5.7
         env:
-          CC_TEST_REPORTER_ID: ${{secrets.TEST_REPORTER_ID}}
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
           GITHUB_REF: ${GITHUB_REF##*/}
         with:
-          coverageCommand: go tool cover -func=c.out
+          coverageCommand: go tool cover -html=./c.out -o ./coverage.html
           debug: true
