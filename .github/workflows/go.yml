@@ -10,24 +10,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Branch name
-        run: echo running on branch ${GITHUB_REF##*/}
+      - name: Checkout main
+        uses: actions/checkout@v2
 
-      - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-
-      - name: Test
-        run: go test -v ./... -coverprofile=./c.out
-
-      - name: Code coverage
-        uses: paambaati/codeclimate-action@v2.5.7
+      - name: Run unit tests
+        run: |
+          make clean test-ci
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-          GITHUB_REF: ${GITHUB_REF##*/}
-        with:
-          coverageCommand: go tool cover -html=./c.out -o ./coverage.html
-          debug: true
