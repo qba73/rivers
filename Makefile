@@ -9,8 +9,6 @@ CC_TEST_REPORTER_ID := ${CC_TEST_REPORTER_ID}
 CC_PREFIX 			:= github.com/qba73/rivers
 
 
-
-
 define PRINT_HELP_PYSCRIPT
 import re, sys
 
@@ -31,11 +29,11 @@ check: ## Run static check analyzer
 	staticcheck ./...
 
 cover: ## Run unit tests and generate test coverage report
-	go test -v ./... -count=1 -coverprofile=coverage.out
+	go test -v ./... -count=1 -covermode=count -coverprofile=coverage.out
 	go tool cover -html coverage.out
 	staticcheck ./...
 
-testlocal: ## Run unit tests locally
+test: ## Run unit tests locally
 	go test -v ./internal/... -count=1
 	staticcheck ./...
 
@@ -53,7 +51,7 @@ runapi: ## Run Rivers API Server locally
 clean: ## Remove docker container if exist
 	docker rm -f ${GO_DOCKER_CONTAINER} || true
 
-test: ## Run unittests inside a container
+testdocker: ## Run unittests inside a container
 	docker run -w /app -v ${ROOT}:/app ${GO_DOCKER_IMAGE} go test ./... -coverprofile=${GO_TEST_OUTFILE}
 	docker run -w /app -v ${ROOT}:/app ${GO_DOCKER_IMAGE} go tool cover -html=${GO_TEST_OUTFILE} -o ${GO_HTML_COV}
 
@@ -86,4 +84,4 @@ endif
 		-e CC_TEST_REPORTER_ID=${CC_TEST_REPORTER_ID} \
 		${GO_DOCKER_IMAGE} ./cc-test-reporter after-build --prefix ${PREFIX}
 
-test-ci: _before-cc test _after-cc
+test-ci: _before-cc testdocker _after-cc
