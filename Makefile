@@ -8,6 +8,8 @@ GO_DOCKER_CONTAINER := rivers-container
 CC_TEST_REPORTER_ID := ${CC_TEST_REPORTER_ID}
 CC_PREFIX 			:= github.com/qba73/rivers
 
+SSL_CERT := ~/.ssl/localhost.crt
+SSL_KEY := ~/.ssl/localhost.key
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
@@ -45,8 +47,7 @@ tidy: ## Run go mod tidy and vendor
 # Rivers API
 
 runapi: ## Run Rivers API Server locally
-	go run cmd/rivers-api/main.go
-
+	go run cmd/rivers-api/main.go -cert $(SSL_CERT) -key $(SSL_KEY)
 
 clean: ## Remove docker container if exist
 	docker rm -f ${GO_DOCKER_CONTAINER} || true
