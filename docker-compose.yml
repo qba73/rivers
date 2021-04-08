@@ -1,11 +1,18 @@
-version: "3.8"
+# docker-compose up
+# docker-compose stop
+# docker-compose down
+version: "3"
+
+networks:
+  shared-network:
+    driver: bridge
+
 services:
-  dynamodb-local:
-    command: "-jar DynamoDBLocal.jar -sharedDb -optimizeDbBeforeStartup -dbPath ./data"
-    image: "amazon/dynamodb-local:latest"
-    container_name: dynamodb-local-rivers
+  # This starts a local DB
+  db:
+    container_name: rivers_db
+    networks:
+      - shared-network
+    image: postgres:11.1-alpine
     ports:
-      - "8000:8000"
-    volumes:
-      - "./docker/dynamodb:/home/dynamodblocal/data"
-    working_dir: /home/dynamodblocal
+      - 5432:5432
