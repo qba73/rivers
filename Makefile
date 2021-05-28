@@ -36,7 +36,7 @@ cover: ## Run unit tests and generate test coverage report
 	staticcheck ./...
 
 test: ## Run unit tests locally
-	go test -v ./internal/... -count=1
+	go test -v ./... -count=1
 	staticcheck ./...
 
 # MODULES

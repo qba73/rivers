@@ -78,15 +78,15 @@ type Stations struct {
 	Features []Feature `json:"features"`
 }
 
-// GetAll ...
-func (s Stations) GetAll() Stations {
+// All ...
+func (s Stations) All() Stations {
 	return s
 }
 
-// GetByName takes a feature (station) name and
+// ByName takes a feature (station) name and
 // returns the Feature struct. If provided name is not
 // found it returns an empty Feature.
-func (s Stations) GetByName(name string) Stations {
+func (s Stations) ByName(name string) Stations {
 	var features []Feature
 
 	for _, f := range s.Features {
@@ -98,11 +98,11 @@ func (s Stations) GetByName(name string) Stations {
 	return s
 }
 
-// GetByStationRef takes station ID and returns
+// ByRefID takes station ID and returns
 // matching features (stations). If Station Ref number does
 // not exist it returns Stations struct with empty list of
 // Features (stations/sensors).
-func (s Stations) GetByStationRef(ref string) Stations {
+func (s Stations) ByRefID(ref string) Stations {
 	var features []Feature
 
 	for _, f := range s.Features {
@@ -114,10 +114,10 @@ func (s Stations) GetByStationRef(ref string) Stations {
 	return s
 }
 
-// GetByStationAndSensorRef takes sensor ID and returns matching features
+// ByStationAndSensorRef takes sensor ID and returns matching features
 // (stations). If the sensor ID doesn't exist it returns Stations
 // struct with an empty list of Fetures (stations/sensors).
-func (s Stations) GetByStationAndSensorRef(station, sensor string) Stations {
+func (s Stations) ByStationAndSensorRef(station, sensor string) Stations {
 	var features []Feature
 	for _, f := range s.Features {
 		if f.Properties.StationRef == station && f.Properties.SensorRef == sensor {
@@ -128,9 +128,9 @@ func (s Stations) GetByStationAndSensorRef(station, sensor string) Stations {
 	return s
 }
 
-// GetByRegionID knows how to return stations assigned
+// ByRegionID knows how to return stations assigned
 // to the given region identified by regionID.
-func (s Stations) GetByRegionID(regionID int) Stations {
+func (s Stations) ByRegionID(regionID int) Stations {
 	var features []Feature
 	for _, f := range s.Features {
 		if f.Properties.RegionID == regionID {

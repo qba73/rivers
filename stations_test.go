@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/qba73/rivers/internal/river"
+	river "github.com/qba73/rivers"
 )
 
 // setupStationFile is a helper function for opening
@@ -243,7 +243,7 @@ func TestLoadJSON(t *testing.T) {
 	})
 }
 
-func TestReadStations(t *testing.T) {
+func TestReadStations_coordinates(t *testing.T) {
 	f := setupStationFile(t, "testdata/stationstest.json")
 	defer f.Close()
 
@@ -252,19 +252,16 @@ func TestReadStations(t *testing.T) {
 		t.Fatalf("error when reading stations: %s", err)
 	}
 
-	t.Run("Coordinate system", func(t *testing.T) {
-		want := "EPSG:4326"
+	want := "EPSG:4326"
 
-		got := s.Crs.Properties.Name
+	got := s.Crs.Properties.Name
 
-		if got != want {
-			t.Errorf("got: %s, want: %s", got, want)
-		}
-	})
-
+	if got != want {
+		t.Errorf("got: %s, want: %s", got, want)
+	}
 }
 
-func TestStations(t *testing.T) {
+func TestStations_All(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
@@ -274,7 +271,7 @@ func TestStations(t *testing.T) {
 	}
 
 	t.Run("Retrieve all features", func(t *testing.T) {
-		got := s.GetAll()
+		got := s.All()
 
 		wantLen := 13
 		if len(got.Features) != wantLen {
@@ -286,175 +283,215 @@ func TestStations(t *testing.T) {
 			t.Errorf("GetAll() got error \n%s", cmp.Diff(got.Features, wantFeatures))
 		}
 	})
+}
 
-	t.Run("Retrieve feature by name", func(t *testing.T) {
-		station := "Glaslough"
-		got := s.GetByName(station)
+func TestStations_ByName(t *testing.T) {
+	f := setupStationFile(t, "testdata/latesttest.json")
+	defer f.Close()
 
-		wantLen := 4
-		gotLen := len(got.Features)
+	s, err := river.ReadStations(f)
+	if err != nil {
+		t.Fatalf("error when reading stations: %s", err)
+	}
 
-		if gotLen != wantLen {
-			t.Errorf("GetByName() got number of items: %d, want: %d", gotLen, wantLen)
-		}
+	station := "Glaslough"
+	got := s.ByName(station)
 
-		wantFeatures := []river.Feature{
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003055",
-					StationName: "Glaslough",
-					SensorRef:   "0001",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T05:00:00Z",
-					Value:       "1.053",
-					ErrCode:     99,
-					URL:         "/0000003055/0001/",
-					CSVFile:     "/data/month/03055_0001.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+	wantLen := 4
+	gotLen := len(got.Features)
+
+	if gotLen != wantLen {
+		t.Errorf("GetByName() got number of items: %d, want: %d", gotLen, wantLen)
+	}
+
+	wantFeatures := []river.Feature{
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003055",
+				StationName: "Glaslough",
+				SensorRef:   "0001",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T05:00:00Z",
+				Value:       "1.053",
+				ErrCode:     99,
+				URL:         "/0000003055/0001/",
+				CSVFile:     "/data/month/03055_0001.csv",
 			},
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003055",
-					StationName: "Glaslough",
-					SensorRef:   "0002",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T05:00:00Z",
-					Value:       "6.300",
-					ErrCode:     99,
-					URL:         "/0000003055/0002/",
-					CSVFile:     "/data/month/03055_0002.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		},
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003055",
+				StationName: "Glaslough",
+				SensorRef:   "0002",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T05:00:00Z",
+				Value:       "6.300",
+				ErrCode:     99,
+				URL:         "/0000003055/0002/",
+				CSVFile:     "/data/month/03055_0002.csv",
 			},
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003055",
-					StationName: "Glaslough",
-					SensorRef:   "0003",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T05:00:00Z",
-					Value:       "12.800",
-					ErrCode:     99,
-					URL:         "/0000003055/0003/",
-					CSVFile:     "/data/month/03055_0003.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		},
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003055",
+				StationName: "Glaslough",
+				SensorRef:   "0003",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T05:00:00Z",
+				Value:       "12.800",
+				ErrCode:     99,
+				URL:         "/0000003055/0003/",
+				CSVFile:     "/data/month/03055_0003.csv",
 			},
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003055",
-					StationName: "Glaslough",
-					SensorRef:   "OD",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T05:00:00Z",
-					Value:       "36.840",
-					ErrCode:     99,
-					URL:         "/0000003055/OD/",
-					CSVFile:     "/data/month/03055_OD.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		},
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003055",
+				StationName: "Glaslough",
+				SensorRef:   "OD",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T05:00:00Z",
+				Value:       "36.840",
+				ErrCode:     99,
+				URL:         "/0000003055/OD/",
+				CSVFile:     "/data/month/03055_OD.csv",
 			},
-		}
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		},
+	}
 
-		if !cmp.Equal(got.Features, wantFeatures) {
-			t.Errorf("GetByName(%s) \n%s", station, cmp.Diff(got.Features, wantFeatures))
-		}
-	})
+	if !cmp.Equal(got.Features, wantFeatures) {
+		t.Errorf("GetByName(%s) \n%s", station, cmp.Diff(got.Features, wantFeatures))
+	}
+}
 
-	t.Run("Get feature by station ref number single", func(t *testing.T) {
-		ref := "0000003058"
-		got := s.GetByStationRef(ref)
+func TestStations_ByRefNumber(t *testing.T) {
+	f := setupStationFile(t, "testdata/latesttest.json")
+	defer f.Close()
 
-		wantLen := 1
-		gotLen := len(got.Features)
+	s, err := river.ReadStations(f)
+	if err != nil {
+		t.Fatalf("error when reading stations: %s", err)
+	}
 
-		if gotLen != wantLen {
-			t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
-		}
+	ref := "0000003058"
+	got := s.ByRefID(ref)
 
-		wantFeatures := []river.Feature{
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003058",
-					StationName: "Cappog Bridge",
-					SensorRef:   "0001",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T06:00:00Z",
-					Value:       "1.233",
-					ErrCode:     99,
-					URL:         "/0000003058/0001/",
-					CSVFile:     "/data/month/03058_0001.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
+	wantLen := 1
+	gotLen := len(got.Features)
+
+	if gotLen != wantLen {
+		t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
+	}
+
+	wantFeatures := []river.Feature{
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003058",
+				StationName: "Cappog Bridge",
+				SensorRef:   "0001",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T06:00:00Z",
+				Value:       "1.233",
+				ErrCode:     99,
+				URL:         "/0000003058/0001/",
+				CSVFile:     "/data/month/03058_0001.csv",
 			},
-		}
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
+		},
+	}
 
-		if !cmp.Equal(got.Features, wantFeatures) {
-			t.Errorf("GetByStationRef(%s) \n%s", ref, cmp.Diff(got.Features, wantFeatures))
-		}
-	})
+	if !cmp.Equal(got.Features, wantFeatures) {
+		t.Errorf("GetByStationRef(%s) \n%s", ref, cmp.Diff(got.Features, wantFeatures))
+	}
+}
 
-	t.Run("Get feture by station ref number multiple", func(t *testing.T) {
-		ref := "0000001043"
-		got := s.GetByStationRef(ref)
+func TestStations_RefNumber_multiple(t *testing.T) {
+	f := setupStationFile(t, "testdata/latesttest.json")
+	defer f.Close()
 
-		wantLen := 4
-		gotLen := len(got.Features)
+	s, err := river.ReadStations(f)
+	if err != nil {
+		t.Fatalf("error when reading stations: %s", err)
+	}
 
-		if gotLen != wantLen {
-			t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
-		}
-	})
+	ref := "0000001043"
+	got := s.ByRefID(ref)
 
-	t.Run("Get feature by station and sensor ref", func(t *testing.T) {
-		stationRef := "0000003055"
-		sensorRef := "0003"
-		got := s.GetByStationAndSensorRef(stationRef, sensorRef)
+	wantLen := 4
+	gotLen := len(got.Features)
 
-		wantLen := 1
-		gotLen := len(got.Features)
+	if gotLen != wantLen {
+		t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
+	}
+}
 
-		if gotLen != wantLen {
-			t.Errorf("GetByStationAndSensorRef(%s, %s), got: %d, want: %d", stationRef, sensorRef, gotLen, wantLen)
-		}
+func TestStations_BySensorRef(t *testing.T) {
+	f := setupStationFile(t, "testdata/latesttest.json")
+	defer f.Close()
 
-		wantFeatures := []river.Feature{
-			{
-				Type: "Feature",
-				Properties: river.Property{
-					StationRef:  "0000003055",
-					StationName: "Glaslough",
-					SensorRef:   "0003",
-					RegionID:    10,
-					Timestamp:   "2021-02-18T05:00:00Z",
-					Value:       "12.800",
-					ErrCode:     99,
-					URL:         "/0000003055/0003/",
-					CSVFile:     "/data/month/03055_0003.csv",
-				},
-				Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
-			}}
+	s, err := river.ReadStations(f)
+	if err != nil {
+		t.Fatalf("error when reading stations: %s", err)
+	}
 
-		if !cmp.Equal(got.Features, wantFeatures) {
-			t.Errorf("GetByStationAndSensorRef(%s, %s) got error: \n%s", stationRef, sensorRef, cmp.Diff(got.Features, wantFeatures))
-		}
-	})
+	stationRef := "0000003055"
+	sensorRef := "0003"
+	got := s.ByStationAndSensorRef(stationRef, sensorRef)
 
-	t.Run("Get features by group ID", func(t *testing.T) {
-		regionID := 10
-		got := s.GetByRegionID(regionID)
+	wantLen := 1
+	gotLen := len(got.Features)
 
-		wantLen := 5
-		gotLen := len(got.Features)
+	if gotLen != wantLen {
+		t.Errorf("GetByStationAndSensorRef(%s, %s), got: %d, want: %d", stationRef, sensorRef, gotLen, wantLen)
+	}
 
-		if gotLen != wantLen {
-			t.Errorf("GetByRegionID(%d) got: %d, want: %d", regionID, gotLen, wantLen)
-		}
-	})
+	wantFeatures := []river.Feature{
+		{
+			Type: "Feature",
+			Properties: river.Property{
+				StationRef:  "0000003055",
+				StationName: "Glaslough",
+				SensorRef:   "0003",
+				RegionID:    10,
+				Timestamp:   "2021-02-18T05:00:00Z",
+				Value:       "12.800",
+				ErrCode:     99,
+				URL:         "/0000003055/0003/",
+				CSVFile:     "/data/month/03055_0003.csv",
+			},
+			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		}}
+
+	if !cmp.Equal(got.Features, wantFeatures) {
+		t.Errorf("GetByStationAndSensorRef(%s, %s) got error: \n%s", stationRef, sensorRef, cmp.Diff(got.Features, wantFeatures))
+	}
+}
+
+func TestStations_ByGroupID(t *testing.T) {
+	f := setupStationFile(t, "testdata/latesttest.json")
+	defer f.Close()
+
+	s, err := river.ReadStations(f)
+	if err != nil {
+		t.Fatalf("error when reading stations: %s", err)
+	}
+
+	regionID := 10
+	got := s.ByRegionID(regionID)
+
+	wantLen := 5
+	gotLen := len(got.Features)
+
+	if gotLen != wantLen {
+		t.Errorf("GetByRegionID(%d) got: %d, want: %d", regionID, gotLen, wantLen)
+	}
 }
