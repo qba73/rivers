@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/qba73/rivers/internal/river"
-	"github.com/qba73/rivers/internal/river/testhelper"
+	river "github.com/qba73/rivers"
+	"github.com/qba73/rivers/testhelper"
 )
 
 func setup(t *testing.T) *os.File {

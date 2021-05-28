@@ -31,7 +31,7 @@ func TmpTextFile(t *testing.T, dirname, filename, content string) *os.File {
 func TmpStationTestFile(t *testing.T, dirname, filename string) *os.File {
 	file := TmpFile(t, dirname, filename)
 	_, err := file.WriteString(stationsData)
-	if err !=  nil {
+	if err != nil {
 		t.Fatalf("failed to write to temp file: %s", err)
 	}
 	return file

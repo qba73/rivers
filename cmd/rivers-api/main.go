@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/qba73/rivers/internal/river"
+	river "github.com/qba73/rivers"
 )
 
 var (
@@ -18,11 +18,6 @@ var (
 	keyfile string
 )
 
-func init()  {
-	flag.StringVar(&addr, "addr", ":5000", ":5000")
-	flag.StringVar(&certfile, "cert", "", "server certificate file")
-	flag.StringVar(&keyfile, "key", "", "server key file")
-}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -34,27 +29,29 @@ func home(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte(`{"name": "Rivers project API", "version": "v1"}`))
 }
 
-func handleStations(w http.ResponseWriter, r *http.Request) {
+func handlerListStations(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed" , http.StatusMethodNotAllowed)
 		return
 	}
-	if err := stations(w, r); err != nil {
+	if err := ListStations(w, r); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
-func stations(w http.ResponseWriter, r *http.Request) error {
+func ListStations(w http.ResponseWriter, r *http.Request) error {
 	stations, err := river.LoadStations("latesttest.json")
 	if err != nil {
 		return err
 	}
-	riverStations := stations.GetAll()
+	riverStations := stations.All()
+
 	output, err := json.Marshal(&riverStations)
 	if err != nil {
 		return err
 	}
+
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(output)
@@ -62,27 +59,15 @@ func stations(w http.ResponseWriter, r *http.Request) error {
 }
 
 
-func showFeature(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"type": "Feature", "properties": {"name": "Sandy Mills", "ref": "0000001041"}, "geometry": {"type": "Point", "coordinates": [-7.575758, 54.838318]}}`))
-}
-
-
-
 func main() {
+	flag.StringVar(&addr, "addr", ":5000", ":5000")
+	flag.StringVar(&certfile, "cert", "", "server certificate file")
+	flag.StringVar(&keyfile, "key", "", "server key file")
 	flag.Parse()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", home)
-	r.HandleFunc("/feature", showFeature).Methods(http.MethodGet)
-	r.HandleFunc("/stations", handleStations).Methods(http.MethodGet)
-
-
+	r.HandleFunc("/stations", handlerListStations).Methods(http.MethodGet)
 
 	log.Println("starting server on :5000")
 
@@ -97,5 +82,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-
