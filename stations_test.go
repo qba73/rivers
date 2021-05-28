@@ -1,4 +1,4 @@
-package river_test
+package rivers_test
 
 import (
 	"os"
