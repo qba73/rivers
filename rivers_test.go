@@ -1,3 +1,5 @@
+// +build !integration
+
 package rivers_test
 
 import (
@@ -6,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	river "github.com/qba73/rivers"
+	"github.com/qba73/rivers"
 	"github.com/qba73/rivers/testhelper"
 )
 
@@ -26,7 +28,7 @@ func cleanup(file *os.File) {
 func TestLoadCSV(t *testing.T) {
 	t.Run("Load correct file", func(t *testing.T) {
 		testFile := "testdata/data.csv"
-		got, err := river.LoadCSV(testFile)
+		got, err := rivers.LoadCSV(testFile)
 		if err != nil {
 			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
 		}
@@ -41,7 +43,7 @@ func TestLoadCSV(t *testing.T) {
 		testFile := "testdata/notexisting.csv"
 		expectedErr := true
 
-		got, err := river.LoadCSV(testFile)
+		got, err := rivers.LoadCSV(testFile)
 		if (err != nil) != expectedErr {
 			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
 		}
@@ -61,7 +63,7 @@ func TestReadCSV(t *testing.T) {
 		t.Fatalf("can't read csv data: %s", err)
 	}
 
-	data, err := river.ReadCSV(csvFile)
+	data, err := rivers.ReadCSV(csvFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +80,7 @@ func TestReadCSV(t *testing.T) {
 
 	wantValue := 1.772
 
-	want := river.Level{
+	want := rivers.Level{
 		Timestamp: wantTimestamp,
 		Value:     wantValue,
 	}

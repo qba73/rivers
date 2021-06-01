@@ -1,3 +1,5 @@
+// +build !integration
+
 package rivers_test
 
 import (
@@ -5,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	river "github.com/qba73/rivers"
+	"github.com/qba73/rivers"
 )
 
 // setupStationFile is a helper function for opening
@@ -18,10 +20,10 @@ func setupStationFile(t *testing.T, name string) *os.File {
 	return f
 }
 
-var testFeatures = []river.Feature{
+var testFeatures = []rivers.Feature{
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0001",
@@ -32,11 +34,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001041/0001/",
 			CSVFile:     "/data/month/01041_0001.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0002",
@@ -47,11 +49,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001041/0002/",
 			CSVFile:     "/data/month/01041_0002.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0003",
@@ -62,11 +64,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001041/0003/",
 			CSVFile:     "/data/month/01041_0003.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "OD",
@@ -77,11 +79,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001041/OD/",
 			CSVFile:     "/data/month/01041_OD.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.575758, 54.838318}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0001",
@@ -92,11 +94,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001043/0001/",
 			CSVFile:     "/data/month/01043_0001.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0002",
@@ -107,11 +109,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001043/0002/",
 			CSVFile:     "/data/month/01043_0002.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0003",
@@ -122,11 +124,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001043/0003/",
 			CSVFile:     "/data/month/01043_0003.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "OD",
@@ -137,11 +139,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000001043/OD/",
 			CSVFile:     "/data/month/01043_OD.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.790749, 54.799769}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0001",
@@ -152,11 +154,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000003055/0001/",
 			CSVFile:     "/data/month/03055_0001.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0002",
@@ -167,11 +169,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000003055/0002/",
 			CSVFile:     "/data/month/03055_0002.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0003",
@@ -182,11 +184,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000003055/0003/",
 			CSVFile:     "/data/month/03055_0003.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "OD",
@@ -197,11 +199,11 @@ var testFeatures = []river.Feature{
 			URL:         "/0000003055/OD/",
 			CSVFile:     "/data/month/03055_OD.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 	},
 	{
 		Type: "Feature",
-		Properties: river.Property{
+		Properties: rivers.Property{
 			StationRef:  "0000003058",
 			StationName: "Cappog Bridge",
 			SensorRef:   "0001",
@@ -212,13 +214,13 @@ var testFeatures = []river.Feature{
 			URL:         "/0000003058/0001/",
 			CSVFile:     "/data/month/03058_0001.csv",
 		},
-		Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
+		Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
 	},
 }
 
 func TestLoadJSON(t *testing.T) {
 	dataFile := "testdata/latesttest.json"
-	st, err := river.LoadStations(dataFile)
+	st, err := rivers.LoadStations(dataFile)
 	if err != nil {
 		t.Fatalf("can't read data file: %s", err)
 	}
@@ -247,7 +249,7 @@ func TestReadStations_coordinates(t *testing.T) {
 	f := setupStationFile(t, "testdata/stationstest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -265,7 +267,7 @@ func TestStations_All(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -289,7 +291,7 @@ func TestStations_ByName(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -304,10 +306,10 @@ func TestStations_ByName(t *testing.T) {
 		t.Errorf("GetByName() got number of items: %d, want: %d", gotLen, wantLen)
 	}
 
-	wantFeatures := []river.Feature{
+	wantFeatures := []rivers.Feature{
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0001",
@@ -318,11 +320,11 @@ func TestStations_ByName(t *testing.T) {
 				URL:         "/0000003055/0001/",
 				CSVFile:     "/data/month/03055_0001.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 		},
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0002",
@@ -333,11 +335,11 @@ func TestStations_ByName(t *testing.T) {
 				URL:         "/0000003055/0002/",
 				CSVFile:     "/data/month/03055_0002.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 		},
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0003",
@@ -348,11 +350,11 @@ func TestStations_ByName(t *testing.T) {
 				URL:         "/0000003055/0003/",
 				CSVFile:     "/data/month/03055_0003.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 		},
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "OD",
@@ -363,7 +365,7 @@ func TestStations_ByName(t *testing.T) {
 				URL:         "/0000003055/OD/",
 				CSVFile:     "/data/month/03055_OD.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 		},
 	}
 
@@ -376,7 +378,7 @@ func TestStations_ByRefNumber(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -391,10 +393,10 @@ func TestStations_ByRefNumber(t *testing.T) {
 		t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
 	}
 
-	wantFeatures := []river.Feature{
+	wantFeatures := []rivers.Feature{
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003058",
 				StationName: "Cappog Bridge",
 				SensorRef:   "0001",
@@ -405,7 +407,7 @@ func TestStations_ByRefNumber(t *testing.T) {
 				URL:         "/0000003058/0001/",
 				CSVFile:     "/data/month/03058_0001.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-7.021297, 54.266809}},
 		},
 	}
 
@@ -418,7 +420,7 @@ func TestStations_RefNumber_multiple(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -438,7 +440,7 @@ func TestStations_BySensorRef(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
@@ -454,10 +456,10 @@ func TestStations_BySensorRef(t *testing.T) {
 		t.Errorf("GetByStationAndSensorRef(%s, %s), got: %d, want: %d", stationRef, sensorRef, gotLen, wantLen)
 	}
 
-	wantFeatures := []river.Feature{
+	wantFeatures := []rivers.Feature{
 		{
 			Type: "Feature",
-			Properties: river.Property{
+			Properties: rivers.Property{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0003",
@@ -468,7 +470,7 @@ func TestStations_BySensorRef(t *testing.T) {
 				URL:         "/0000003055/0003/",
 				CSVFile:     "/data/month/03055_0003.csv",
 			},
-			Geometry: river.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
+			Geometry: rivers.Geometry{Type: "Point", Coordinates: []float64{-6.894344, 54.323281}},
 		}}
 
 	if !cmp.Equal(got.Features, wantFeatures) {
@@ -480,7 +482,7 @@ func TestStations_ByGroupID(t *testing.T) {
 	f := setupStationFile(t, "testdata/latesttest.json")
 	defer f.Close()
 
-	s, err := river.ReadStations(f)
+	s, err := rivers.ReadStations(f)
 	if err != nil {
 		t.Fatalf("error when reading stations: %s", err)
 	}
