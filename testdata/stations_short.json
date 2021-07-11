@@ -1,0 +1,31 @@
+{
+    "type": "FeatureCollection",
+    "crs": {
+        "type": "name", 
+        "properties":{"name": "EPSG:4326"}
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Sandy Mills",
+                "ref": "0000001041"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-7.575758, 54.838318]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Ballybofey",
+                "ref": "0000001043"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-7.790749, 54.799769]
+            }
+        }
+    ]
+}

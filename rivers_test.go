@@ -26,32 +26,30 @@ func cleanup(file *os.File) {
 }
 
 func TestLoadCSV(t *testing.T) {
-	t.Run("Load correct file", func(t *testing.T) {
-		testFile := "testdata/data.csv"
-		got, err := rivers.LoadCSV(testFile)
-		if err != nil {
-			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
-		}
+	t.Parallel()
 
-		wantLen := 96
-		if wantLen != len(got) {
-			t.Errorf("got: %d, want: %d", len(got), wantLen)
-		}
-	})
+	tt := []struct {
+		name        string
+		filePath    string
+		want        int
+		expectedErr bool
+	}{
+		{name: "load correct file", filePath: "testdata/data.csv", want: 96, expectedErr: false},
+		{name: "load not existing file", filePath: "testdata/notexisting.csv", want: 0, expectedErr: true},
+	}
 
-	t.Run("Load not existing file", func(t *testing.T) {
-		testFile := "testdata/notexisting.csv"
-		expectedErr := true
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := rivers.LoadCSV(tc.filePath)
+			if (err != nil) != tc.expectedErr {
+				t.Fatalf("%s, LoadCSV(%q) failed, error: %v", tc.name, tc.filePath, err)
+			}
 
-		got, err := rivers.LoadCSV(testFile)
-		if (err != nil) != expectedErr {
-			t.Fatalf("LoadCSV(%s) returned error: %s", testFile, err)
-		}
-
-		if !expectedErr && (got != nil) {
-			t.Errorf("got %v, want nil", got)
-		}
-	})
+			if !tc.expectedErr && (tc.want != len(got)) {
+				t.Errorf("%s, LoadCSV(%q) got: %v, want: %d", tc.name, tc.filePath, got, tc.want)
+			}
+		})
+	}
 }
 
 func TestReadCSV(t *testing.T) {

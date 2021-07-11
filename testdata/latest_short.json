@@ -1,0 +1,69 @@
+{
+	"type": "FeatureCollection",
+	"crs": {
+	  "type": "name",
+	  "properties": { "name": "EPSG:4326" }
+	},
+	"features": [
+	  {
+		"type": "Feature",
+		"properties": {
+		  "station_ref": "0000001041",
+		  "station_name": "Sandy Mills",
+		  "sensor_ref": "0001",
+		  "region_id": 3,
+		  "datetime": "2021-02-18T06:00:00Z",
+		  "value": "1.715",
+		  "err_code": 99,
+		  "url": "/0000001041/0001/",
+		  "csv_file": "/data/month/01041_0001.csv"
+		},
+		"geometry": { "type": "Point", "coordinates": [-7.575758, 54.838318] }
+	  },
+	  {
+		"type": "Feature",
+		"properties": {
+		  "station_ref": "0000001041",
+		  "station_name": "Sandy Mills",
+		  "sensor_ref": "0002",
+		  "region_id": 3,
+		  "datetime": "2021-02-18T06:00:00Z",
+		  "value": "4.800",
+		  "err_code": 99,
+		  "url": "/0000001041/0002/",
+		  "csv_file": "/data/month/01041_0002.csv"
+		},
+		"geometry": { "type": "Point", "coordinates": [-7.575758, 54.838318] }
+	  },
+	  {
+		"type": "Feature",
+		"properties": {
+		  "station_ref": "0000001041",
+		  "station_name": "Sandy Mills",
+		  "sensor_ref": "0003",
+		  "region_id": 3,
+		  "datetime": "2021-02-18T06:00:00Z",
+		  "value": "13.000",
+		  "err_code": 99,
+		  "url": "/0000001041/0003/",
+		  "csv_file": "/data/month/01041_0003.csv"
+		},
+		"geometry": { "type": "Point", "coordinates": [-7.575758, 54.838318] }
+	  },
+	  {
+		"type": "Feature",
+		"properties": {
+		  "station_ref": "0000001041",
+		  "station_name": "Sandy Mills",
+		  "sensor_ref": "OD",
+		  "region_id": 3,
+		  "datetime": "2021-02-18T06:00:00Z",
+		  "value": "8.060",
+		  "err_code": 99,
+		  "url": "/0000001041/OD/",
+		  "csv_file": "/data/month/01041_OD.csv"
+		},
+		"geometry": { "type": "Point", "coordinates": [-7.575758, 54.838318] }
+	  }
+    ]
+}

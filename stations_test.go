@@ -20,10 +20,10 @@ func setupStationFile(t *testing.T, name string) *os.File {
 	return f
 }
 
-var testFeatures = []rivers.Feature{
+var testFeatures = []rivers.FeatureLatest{
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0001",
@@ -38,7 +38,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0002",
@@ -53,7 +53,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "0003",
@@ -68,7 +68,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001041",
 			StationName: "Sandy Mills",
 			SensorRef:   "OD",
@@ -83,7 +83,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0001",
@@ -98,7 +98,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0002",
@@ -113,7 +113,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "0003",
@@ -128,7 +128,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000001043",
 			StationName: "Ballybofey",
 			SensorRef:   "OD",
@@ -143,7 +143,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0001",
@@ -158,7 +158,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0002",
@@ -173,7 +173,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "0003",
@@ -188,7 +188,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000003055",
 			StationName: "Glaslough",
 			SensorRef:   "OD",
@@ -203,7 +203,7 @@ var testFeatures = []rivers.Feature{
 	},
 	{
 		Type: "Feature",
-		Properties: rivers.Property{
+		Properties: rivers.PropertyLatest{
 			StationRef:  "0000003058",
 			StationName: "Cappog Bridge",
 			SensorRef:   "0001",
@@ -306,10 +306,10 @@ func TestStations_ByName(t *testing.T) {
 		t.Errorf("GetByName() got number of items: %d, want: %d", gotLen, wantLen)
 	}
 
-	wantFeatures := []rivers.Feature{
+	wantFeatures := []rivers.FeatureLatest{
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0001",
@@ -324,7 +324,7 @@ func TestStations_ByName(t *testing.T) {
 		},
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0002",
@@ -339,7 +339,7 @@ func TestStations_ByName(t *testing.T) {
 		},
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0003",
@@ -354,7 +354,7 @@ func TestStations_ByName(t *testing.T) {
 		},
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "OD",
@@ -393,10 +393,10 @@ func TestStations_ByRefNumber(t *testing.T) {
 		t.Errorf("GetByStationRef(%s) got number of features: %d, want: %d", ref, gotLen, wantLen)
 	}
 
-	wantFeatures := []rivers.Feature{
+	wantFeatures := []rivers.FeatureLatest{
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003058",
 				StationName: "Cappog Bridge",
 				SensorRef:   "0001",
@@ -456,10 +456,10 @@ func TestStations_BySensorRef(t *testing.T) {
 		t.Errorf("GetByStationAndSensorRef(%s, %s), got: %d, want: %d", stationRef, sensorRef, gotLen, wantLen)
 	}
 
-	wantFeatures := []rivers.Feature{
+	wantFeatures := []rivers.FeatureLatest{
 		{
 			Type: "Feature",
-			Properties: rivers.Property{
+			Properties: rivers.PropertyLatest{
 				StationRef:  "0000003055",
 				StationName: "Glaslough",
 				SensorRef:   "0003",
