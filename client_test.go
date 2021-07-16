@@ -184,7 +184,7 @@ func TestGetLatest(t *testing.T) {
 	}
 }
 
-func TestGetReadings(t *testing.T) {
+func TestGetDayLevel(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/day", "testdata/day_01041_0001.csv", t)
@@ -216,6 +216,45 @@ func TestGetReadings(t *testing.T) {
 	got, err := client.GetDayLevel(stationID)
 	if err != nil {
 		t.Fatalf("client.GetDayLevel(%q) got error %v", stationID, err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestGetWeekLevel(t *testing.T) {
+	t.Parallel()
+
+	ts := startServer("/data/week", "testdata/week_01041_0001.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.Level{
+		{
+			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
+			0.294,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
+			0.293,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
+			0.293,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
+			0.293,
+		},
+	}
+
+	stationID := "010104"
+	got, err := client.GetWeekLevel(stationID)
+	if err != nil {
+		t.Fatalf("client.GetWeekLevel(%q) got error %v", stationID, err)
 	}
 
 	if !cmp.Equal(want, got) {

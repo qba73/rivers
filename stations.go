@@ -6,6 +6,52 @@ import (
 	"os"
 )
 
+// SensorFunction represents a type of
+// the sensor and what function it
+// plays in the gauge group.
+type SensorFunction int
+
+const (
+	LevelSensor SensorFunction = iota + 1
+	TempSensor
+	VoltageSensor
+)
+
+// GaugeGroup represents a group of measuring stations
+// located in the geographical area of Ireland.
+type GaugeGroup int
+
+const (
+	Nore GaugeGroup = iota + 1
+	Shannon
+	Turlough
+	Barrow
+	MunsterBlackwater
+	SuirBackUp
+	_
+	Erne
+	Corrib
+	Moy
+	Fergus
+	Maigue
+	Slaney
+	ShannonLRee
+	Suck
+	Tidal
+	Boyne
+	MunsterBlackwaterMallow
+	MunsterBlackwaterFermoy
+	Inny
+	Brosna
+	Foyle
+	Bandon
+	Laune
+	Ballysadare
+	Suir
+	WaterfordCity
+	SouthGalway
+)
+
 type Station struct {
 	Name  string
 	RefNo string

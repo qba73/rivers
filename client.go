@@ -73,6 +73,18 @@ func (c *client) GetDayLevel(stationID string) ([]Level, error) {
 	return c.sendRequestCSV(req)
 }
 
+func (c *client) GetWeekLevel(stationID string) ([]Level, error) {
+	fname := fmt.Sprintf("%s_0001.csv", stationID)
+	url := fmt.Sprintf("%s/data/week/%s", c.BaseURL, fname)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
 func (c *client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
