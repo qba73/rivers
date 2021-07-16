@@ -261,3 +261,42 @@ func TestGetWeekLevel(t *testing.T) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
+
+func TestGetMonthLevel(t *testing.T) {
+	t.Parallel()
+
+	ts := startServer("/data/month", "testdata/month_01041_0001.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.Level{
+		{
+			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
+			0.294,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
+			0.293,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
+			0.293,
+		},
+		{
+			time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
+			0.293,
+		},
+	}
+
+	stationID := "010104"
+	got, err := client.GetMonthLevel(stationID)
+	if err != nil {
+		t.Fatalf("client.GetMonthLevel(%q) got error %v", stationID, err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
