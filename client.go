@@ -39,7 +39,7 @@ func (c *client) GetStations() (Stations, error) {
 
 	var s Stations
 
-	if err := c.sendRequest(req, &s); err != nil {
+	if err := c.sendRequestJSON(req, &s); err != nil {
 		return Stations{}, err
 	}
 
@@ -54,14 +54,26 @@ func (c *client) GetLatest() (StationsLatest, error) {
 
 	var s StationsLatest
 
-	if err := c.sendRequest(req, &s); err != nil {
+	if err := c.sendRequestJSON(req, &s); err != nil {
 		return StationsLatest{}, err
 	}
 
 	return s, nil
 }
 
-func (c *client) sendRequest(req *http.Request, v interface{}) error {
+func (c *client) GetDayLevel(stationID string) ([]Level, error) {
+	fname := fmt.Sprintf("%s_0001.csv", stationID)
+	url := fmt.Sprintf("%s/data/day/%s", c.BaseURL, fname)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
+func (c *client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 
@@ -84,4 +96,27 @@ func (c *client) sendRequest(req *http.Request, v interface{}) error {
 	}
 
 	return nil
+}
+
+func (c *client) sendRequestCSV(req *http.Request) ([]Level, error) {
+	req.Header.Set("Content-Type", "text/csv")
+	req.Header.Set("Accept", "text/csv")
+
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+
+	out, err := ReadCSV(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+
 }
