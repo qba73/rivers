@@ -5,4 +5,4 @@
 
 # rivers
 
-Project `rivers` provide REST and gRPC APIs for reading water level and temperature data obtained from measurement stations located in Ireland's rivers.
+Project `rivers` provides REST APIs for reading water level and temperature data obtained from measurement stations located in Ireland's rivers.
