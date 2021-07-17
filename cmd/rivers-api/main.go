@@ -13,11 +13,10 @@ import (
 )
 
 var (
-	addr string
+	addr     string
 	certfile string
-	keyfile string
+	keyfile  string
 )
-
 
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -31,7 +30,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func handlerListStations(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed" , http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if err := ListStations(w, r); err != nil {
@@ -52,12 +51,10 @@ func ListStations(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(output)
 	return nil
 }
-
 
 func main() {
 	flag.StringVar(&addr, "addr", ":5000", ":5000")
@@ -72,10 +69,10 @@ func main() {
 	log.Println("starting server on :5000")
 
 	server := http.Server{
-		Addr: addr,
-		Handler: r,
+		Addr:         addr,
+		Handler:      r,
 		WriteTimeout: 15 * time.Second,
-		ReadTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
 	if err := server.ListenAndServeTLS(certfile, keyfile); err != nil {

@@ -17,41 +17,6 @@ const (
 	voltageSensor
 )
 
-// GaugeGroup represents a group of measuring stations
-// located in the geographical area of Ireland.
-type GaugeGroup int
-
-const (
-	Nore GaugeGroup = iota + 1
-	Shannon
-	Turlough
-	Barrow
-	MunsterBlackwater
-	SuirBackUp
-	_
-	Erne
-	Corrib
-	Moy
-	Fergus
-	Maigue
-	Slaney
-	ShannonLRee
-	Suck
-	Tidal
-	Boyne
-	MunsterBlackwaterMallow
-	MunsterBlackwaterFermoy
-	Inny
-	Brosna
-	Foyle
-	Bandon
-	Laune
-	Ballysadare
-	Suir
-	WaterfordCity
-	SouthGalway
-)
-
 type Station struct {
 	Name  string
 	RefNo string
@@ -83,18 +48,20 @@ func ReadStations(r io.Reader) (StationsLatest, error) {
 	return s, nil
 }
 
-// Stations represent station data.
+// Stations represents station data.
 type Stations struct {
 	Type     string    `json:"type"`
 	Crs      Crs       `json:"crs"`
 	Features []Feature `json:"features"`
 }
 
+// Crs represents CRS property.
 type Crs struct {
 	Type       string      `json:"type"`
 	Properties CrsProperty `json:"properties"`
 }
 
+// CrsProperty is a property name.
 type CrsProperty struct {
 	Name string `json:"name"`
 }
@@ -211,13 +178,4 @@ func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
 	}
 	s.Features = features
 	return s
-}
-
-type StationGroups struct {
-	Groups []StationGroup `json:""`
-}
-
-type StationGroup struct {
-	Name string `json:"group_name"`
-	ID   int    `json:"group_id"`
 }
