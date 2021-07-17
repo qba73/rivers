@@ -37,7 +37,7 @@ func NewClient() *client {
 // GetStations knows how to return information about all gauges
 // (measurement stations) installed in rivers in Ireland.
 func (c *client) GetStations() (Stations, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/geojson/", c.BaseURL), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/", c.BaseURL), nil)
 	if err != nil {
 		return Stations{}, err
 	}
@@ -72,7 +72,10 @@ func (c *client) GetLatest() (StationsLatest, error) {
 // GetDayLevel knows how to return water level readings recorded for
 // last 24hr period for the given stationID number.
 func (c *client) GetDayLevel(stationID string) ([]SensorReading, error) {
-	url := c.urlLevel(stationID, "day")
+	url, err := c.urlLevel(stationID, "day")
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -84,7 +87,10 @@ func (c *client) GetDayLevel(stationID string) ([]SensorReading, error) {
 // GetWeekLevel knows how to return water level readings recorded for
 // last week period for the given stationID number.
 func (c *client) GetWeekLevel(stationID string) ([]SensorReading, error) {
-	url := c.urlLevel(stationID, "week")
+	url, err := c.urlLevel(stationID, "week")
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -96,7 +102,10 @@ func (c *client) GetWeekLevel(stationID string) ([]SensorReading, error) {
 // GetMonthLevel knows how to return water level readings recorded for
 // last 4 weeks period for the given stationID number.
 func (c *client) GetMonthLevel(stationID string) ([]SensorReading, error) {
-	url := c.urlLevel(stationID, "month")
+	url, err := c.urlLevel(stationID, "month")
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -108,7 +117,11 @@ func (c *client) GetMonthLevel(stationID string) ([]SensorReading, error) {
 // GetDayTemperature knows how to return water temperature
 // recorded for last 24hr period for the given stationID number.
 func (c *client) GetDayTemperature(statioID string) ([]SensorReading, error) {
-	url := c.urlTemperature(statioID, "day")
+	url, err := c.urlTemperature(statioID, "day")
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -120,7 +133,11 @@ func (c *client) GetDayTemperature(statioID string) ([]SensorReading, error) {
 // GetWeekTemperature knows how to return water temperature
 // recorded for last week period for the given stationID number.
 func (c *client) GetWeekTemperature(stationID string) ([]SensorReading, error) {
-	url := c.urlTemperature(stationID, "week")
+	url, err := c.urlTemperature(stationID, "week")
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -132,7 +149,11 @@ func (c *client) GetWeekTemperature(stationID string) ([]SensorReading, error) {
 // GetMonthTemperature knows how to return water temperature
 // recorded for last 4 weeks period for the given stationID number.
 func (c *client) GetMonthTemperature(stationID string) ([]SensorReading, error) {
-	url := c.urlTemperature(stationID, "month")
+	url, err := c.urlTemperature(stationID, "month")
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -141,46 +162,34 @@ func (c *client) GetMonthTemperature(stationID string) ([]SensorReading, error) 
 	return c.sendRequestCSV(req)
 }
 
-func (c *client) urlLevel(stationID, period string) string {
-	var url string
-	switch period {
-	case "day":
-		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameLevel(stationID))
-	case "week":
-		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameLevel(stationID))
-	case "month":
-		url = fmt.Sprintf("%s/data/month/%s", c.BaseURL, fileNameLevel(stationID))
+// urlLevel takes stationid and time period and builds a valid url.
+// If the period is not valid it errors. Period value should be
+// one of 'day', 'week' or 'month'.
+func (c *client) urlLevel(stationID, period string) (string, error) {
+	if ok := validPeriod(period); !ok {
+		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
-
-	return url
+	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameLevel(stationID)), nil
 }
 
-func (c *client) urlTemperature(stationID, period string) string {
-	var url string
-	switch period {
-	case "day":
-		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameTemperature(stationID))
-	case "week":
-		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameTemperature(stationID))
-	case "month":
-		url = fmt.Sprintf("%s/data/month/%s", c.BaseURL, fileNameTemperature(stationID))
+// urlTemperature takes stationid and time period and builds a valid url.
+// If the period is not valid it errors. Period value should be
+// one of 'day', 'week' or 'month'.
+func (c *client) urlTemperature(stationID, period string) (string, error) {
+	if ok := validPeriod(period); !ok {
+		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
-
-	return url
+	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameTemperature(stationID)), nil
 }
 
-func (c *client) urlVoltage(stationID, period string) string {
-	var url string
-	switch period {
-	case "day":
-		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameVoltage(stationID))
-	case "week":
-		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameVoltage(stationID))
-	case "month":
-		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameVoltage(stationID))
+// urlVoltage takes stationid and time period and builds a valid url.
+// If the period is not valid it errors. Period value should be
+// one of 'day', 'week' or 'month'.
+func (c *client) urlVoltage(stationID, period string) (string, error) {
+	if ok := validPeriod(period); !ok {
+		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
-
-	return url
+	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameVoltage(stationID)), nil
 }
 
 func (c *client) sendRequestJSON(req *http.Request, v interface{}) error {
@@ -245,4 +254,13 @@ func fileNameVoltage(stationID string) string {
 
 func fileNameOD(stationID string) string {
 	return fmt.Sprintf("%s_OD.csv", stationID)
+}
+
+func validPeriod(period string) bool {
+	switch period {
+	case "day", "week", "month":
+		return true
+	default:
+		return false
+	}
 }
