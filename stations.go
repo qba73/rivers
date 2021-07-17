@@ -9,12 +9,12 @@ import (
 // SensorFunction represents a type of
 // the sensor and what function it
 // plays in the gauge group.
-type SensorFunction int
+type sensorFunction int
 
 const (
-	LevelSensor SensorFunction = iota + 1
-	TempSensor
-	VoltageSensor
+	levelSensor sensorFunction = iota + 1
+	tempSensor
+	voltageSensor
 )
 
 // GaugeGroup represents a group of measuring stations

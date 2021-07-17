@@ -193,7 +193,7 @@ func TestGetDayLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Level{
+	want := []rivers.SensorReading{
 		{
 			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			0.294,
@@ -232,7 +232,7 @@ func TestGetWeekLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Level{
+	want := []rivers.SensorReading{
 		{
 			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			0.294,
@@ -271,7 +271,7 @@ func TestGetMonthLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Level{
+	want := []rivers.SensorReading{
 		{
 			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			0.294,
@@ -294,6 +294,111 @@ func TestGetMonthLevel(t *testing.T) {
 	got, err := client.GetMonthLevel(stationID)
 	if err != nil {
 		t.Fatalf("client.GetMonthLevel(%q) got error %v", stationID, err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestGetDayTemperature(t *testing.T) {
+	t.Parallel()
+
+	ts := startServer("/data/day", "testdata/day_01041_0002.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.SensorReading{
+		{
+			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			19.900,
+		},
+		{
+			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			19.700,
+		},
+		{
+			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			19.400,
+		},
+	}
+
+	stationID := "010104"
+	got, err := client.GetDayTemperature(stationID)
+	if err != nil {
+		t.Fatalf("GetDayTemperature(%q) got error %v", stationID, err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestGetWeekTemperature(t *testing.T) {
+	t.Parallel()
+
+	ts := startServer("/data/week", "testdata/week_01041_0002.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.SensorReading{
+		{
+			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			19.900,
+		},
+		{
+			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			19.700,
+		},
+		{
+			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			19.400,
+		},
+	}
+
+	stationID := "010104"
+	got, err := client.GetWeekTemperature(stationID)
+	if err != nil {
+		t.Fatalf("GetWeekTemperature(%q) got error %v", stationID, err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestGetMonthTemperature(t *testing.T) {
+	t.Parallel()
+
+	ts := startServer("/data/month", "testdata/month_01041_0002.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.SensorReading{
+		{
+			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			19.900,
+		},
+		{
+			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			19.700,
+		},
+		{
+			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			19.400,
+		},
+	}
+
+	stationID := "010104"
+	got, err := client.GetMonthTemperature(stationID)
+	if err != nil {
+		t.Fatalf("GetMonthTemperature(%q) got error %v", stationID, err)
 	}
 
 	if !cmp.Equal(want, got) {

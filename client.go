@@ -47,7 +47,7 @@ func (c *client) GetStations() (Stations, error) {
 }
 
 func (c *client) GetLatest() (StationsLatest, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
 	if err != nil {
 		return StationsLatest{}, err
 	}
@@ -61,11 +61,9 @@ func (c *client) GetLatest() (StationsLatest, error) {
 	return s, nil
 }
 
-func (c *client) GetDayLevel(stationID string) ([]Level, error) {
-	fname := fmt.Sprintf("%s_0001.csv", stationID)
-	url := fmt.Sprintf("%s/data/day/%s", c.BaseURL, fname)
-
-	req, err := http.NewRequest("GET", url, nil)
+func (c *client) GetDayLevel(stationID string) ([]SensorReading, error) {
+	url := c.urlLevel(stationID, "day")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -73,11 +71,9 @@ func (c *client) GetDayLevel(stationID string) ([]Level, error) {
 	return c.sendRequestCSV(req)
 }
 
-func (c *client) GetWeekLevel(stationID string) ([]Level, error) {
-	fname := fmt.Sprintf("%s_0001.csv", stationID)
-	url := fmt.Sprintf("%s/data/week/%s", c.BaseURL, fname)
-
-	req, err := http.NewRequest("GET", url, nil)
+func (c *client) GetWeekLevel(stationID string) ([]SensorReading, error) {
+	url := c.urlLevel(stationID, "week")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -85,16 +81,86 @@ func (c *client) GetWeekLevel(stationID string) ([]Level, error) {
 	return c.sendRequestCSV(req)
 }
 
-func (c *client) GetMonthLevel(stationID string) ([]Level, error) {
-	fname := fmt.Sprintf("%s_0001.csv", stationID)
-	url := fmt.Sprintf("%s/data/month/%s", c.BaseURL, fname)
-
-	req, err := http.NewRequest("GET", url, nil)
+func (c *client) GetMonthLevel(stationID string) ([]SensorReading, error) {
+	url := c.urlLevel(stationID, "month")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	return c.sendRequestCSV(req)
+}
+
+func (c *client) GetDayTemperature(statioID string) ([]SensorReading, error) {
+	url := c.urlTemperature(statioID, "day")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
+func (c *client) GetWeekTemperature(stationID string) ([]SensorReading, error) {
+	url := c.urlTemperature(stationID, "week")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
+func (c *client) GetMonthTemperature(stationID string) ([]SensorReading, error) {
+	url := c.urlTemperature(stationID, "month")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
+func (c *client) urlLevel(stationID, period string) string {
+	var url string
+	switch period {
+	case "day":
+		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameLevel(stationID))
+	case "week":
+		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameLevel(stationID))
+	case "month":
+		url = fmt.Sprintf("%s/data/month/%s", c.BaseURL, fileNameLevel(stationID))
+	}
+
+	return url
+}
+
+func (c *client) urlTemperature(stationID, period string) string {
+	var url string
+	switch period {
+	case "day":
+		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameTemperature(stationID))
+	case "week":
+		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameTemperature(stationID))
+	case "month":
+		url = fmt.Sprintf("%s/data/month/%s", c.BaseURL, fileNameTemperature(stationID))
+	}
+
+	return url
+}
+
+func (c *client) urlVoltage(stationID, period string) string {
+	var url string
+	switch period {
+	case "day":
+		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameVoltage(stationID))
+	case "week":
+		url = fmt.Sprintf("%s/data/week/%s", c.BaseURL, fileNameVoltage(stationID))
+	case "month":
+		url = fmt.Sprintf("%s/data/day/%s", c.BaseURL, fileNameVoltage(stationID))
+	}
+
+	return url
 }
 
 func (c *client) sendRequestJSON(req *http.Request, v interface{}) error {
@@ -122,7 +188,7 @@ func (c *client) sendRequestJSON(req *http.Request, v interface{}) error {
 	return nil
 }
 
-func (c *client) sendRequestCSV(req *http.Request) ([]Level, error) {
+func (c *client) sendRequestCSV(req *http.Request) ([]SensorReading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 
@@ -143,4 +209,20 @@ func (c *client) sendRequestCSV(req *http.Request) ([]Level, error) {
 
 	return out, nil
 
+}
+
+func fileNameLevel(stationID string) string {
+	return fmt.Sprintf("%s_000%v.csv", stationID, levelSensor)
+}
+
+func fileNameTemperature(stationID string) string {
+	return fmt.Sprintf("%s_000%v.csv", stationID, tempSensor)
+}
+
+func fileNameVoltage(stationID string) string {
+	return fmt.Sprintf("%s_000%v.csv", stationID, voltageSensor)
+}
+
+func fileNameOD(stationID string) string {
+	return fmt.Sprintf("%s_OD.csv", stationID)
 }

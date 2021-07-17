@@ -78,7 +78,7 @@ func TestReadCSV(t *testing.T) {
 
 	wantValue := 1.772
 
-	want := rivers.Level{
+	want := rivers.SensorReading{
 		Timestamp: wantTimestamp,
 		Value:     wantValue,
 	}

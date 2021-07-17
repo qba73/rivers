@@ -17,14 +17,14 @@ const (
 
 // Level represents water level recorded
 // by a gauge at the particular time.
-type Level struct {
+type SensorReading struct {
 	Timestamp time.Time
 	Value     float64
 }
 
 // LoadCSV knows how to open and read given csv file.
 // Upon successful run it returns a slice of level structs.
-func LoadCSV(path string) ([]Level, error) {
+func LoadCSV(path string) ([]SensorReading, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -36,8 +36,8 @@ func LoadCSV(path string) ([]Level, error) {
 // ReadCSV knows how to read a csv file containing
 // readings from a gauge in a format:
 // timestamp,level
-func ReadCSV(csvFile io.Reader) ([]Level, error) {
-	var levels []Level
+func ReadCSV(csvFile io.Reader) ([]SensorReading, error) {
+	var levels []SensorReading
 
 	r := csv.NewReader(csvFile)
 	// We are not interested in the CSV header. We read it
@@ -61,17 +61,17 @@ func ReadCSV(csvFile io.Reader) ([]Level, error) {
 	return levels, nil
 }
 
-func processRecord(r []string) (Level, error) {
+func processRecord(r []string) (SensorReading, error) {
 	tm, err := processTimestamp(r)
 	if err != nil {
-		return Level{}, err
+		return SensorReading{}, err
 	}
 	val, err := processValue(r)
 	if err != nil {
-		return Level{}, err
+		return SensorReading{}, err
 	}
 
-	return Level{Timestamp: tm, Value: val}, nil
+	return SensorReading{Timestamp: tm, Value: val}, nil
 }
 
 func processTimestamp(record []string) (time.Time, error) {
