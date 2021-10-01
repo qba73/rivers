@@ -15,7 +15,7 @@ const (
 	GaugeTimeFormat = "2006-01-02 15:04"
 )
 
-// Level represents water level recorded
+// SensorReading represents water level recorded
 // by a gauge at the particular time.
 type SensorReading struct {
 	Timestamp time.Time

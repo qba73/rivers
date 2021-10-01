@@ -12,6 +12,13 @@ const (
 	baseurl = "http://waterlevel.ie"
 )
 
+// pattern ! make note in my notebook
+var validPeriod = map[string]bool{
+	"day":   true,
+	"week":  true,
+	"month": true,
+}
+
 type errResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -162,11 +169,25 @@ func (c *client) GetMonthTemperature(stationID string) ([]SensorReading, error) 
 	return c.sendRequestCSV(req)
 }
 
+func (c *client) GetDayVoltage(stationID string) ([]SensorReading, error) {
+	url, err := c.urlVoltage(stationID, "day")
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.sendRequestCSV(req)
+}
+
 // urlLevel takes stationid and time period and builds a valid url.
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *client) urlLevel(stationID, period string) (string, error) {
-	if ok := validPeriod(period); !ok {
+	if !validPeriod[period] {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameLevel(stationID)), nil
@@ -176,7 +197,7 @@ func (c *client) urlLevel(stationID, period string) (string, error) {
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *client) urlTemperature(stationID, period string) (string, error) {
-	if ok := validPeriod(period); !ok {
+	if !validPeriod[period] {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameTemperature(stationID)), nil
@@ -186,7 +207,7 @@ func (c *client) urlTemperature(stationID, period string) (string, error) {
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *client) urlVoltage(stationID, period string) (string, error) {
-	if ok := validPeriod(period); !ok {
+	if !validPeriod[period] {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameVoltage(stationID)), nil
@@ -252,15 +273,8 @@ func fileNameVoltage(stationID string) string {
 	return fmt.Sprintf("%s_000%v.csv", stationID, voltageSensor)
 }
 
+/*
 func fileNameOD(stationID string) string {
 	return fmt.Sprintf("%s_OD.csv", stationID)
 }
-
-func validPeriod(period string) bool {
-	switch period {
-	case "day", "week", "month":
-		return true
-	default:
-		return false
-	}
-}
+*/

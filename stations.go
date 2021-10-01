@@ -6,17 +6,14 @@ import (
 	"os"
 )
 
-// SensorFunction represents a type of
-// the sensor and what function it
-// plays in the gauge group.
-type sensorFunction int
-
 const (
-	levelSensor sensorFunction = iota + 1
-	tempSensor
-	voltageSensor
+	levelSensor   = 1
+	tempSensor    = 2
+	voltageSensor = 3
 )
 
+// Station is a measurement station
+// situated in the lat long location.
 type Station struct {
 	Name  string
 	RefNo string
@@ -66,7 +63,7 @@ type CrsProperty struct {
 	Name string `json:"name"`
 }
 
-// Feture represents a feature with properties describing
+// Feature represents a feature with properties describing
 // gauge name and gauge ID.
 type Feature struct {
 	Type       string   `json:"type"`
@@ -88,7 +85,7 @@ type FeatureLatest struct {
 	Geometry   Geometry       `json:"geometry"`
 }
 
-// Property represents properties of a single gauge station.
+// PropertyLatest represents properties of a single gauge station.
 type PropertyLatest struct {
 	StationRef  string `json:"station_ref"`
 	StationName string `json:"station_name"`
@@ -107,7 +104,7 @@ type Geometry struct {
 	Coordinates []float64 `json:"coordinates"`
 }
 
-// Stations represents geojson data describing
+// StationsLatest represents geojson data describing
 // all gauge stations and coordinates data.
 type StationsLatest struct {
 	Type     string          `json:"type"`

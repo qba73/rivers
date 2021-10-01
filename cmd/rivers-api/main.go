@@ -1,43 +1,22 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
 
-	"github.com/gorilla/mux"
 	river "github.com/qba73/rivers"
+	"github.com/qba73/rivers/cmd/rivers-api/handlers"
 )
 
 var (
-	addr     string
-	certfile string
-	keyfile  string
+	addr string
 )
-
-func home(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"name": "Rivers project API", "version": "v1"}`)
-	//w.Write([]byte(`{"name": "Rivers project API", "version": "v1"}`))
-}
-
-func handlerListStations(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	if err := ListStations(w, r); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
 
 func ListStations(w http.ResponseWriter, r *http.Request) error {
 	stations, err := river.LoadStations("latesttest.json")
@@ -58,24 +37,45 @@ func ListStations(w http.ResponseWriter, r *http.Request) error {
 
 func main() {
 	flag.StringVar(&addr, "addr", ":5000", ":5000")
-	flag.StringVar(&certfile, "cert", "", "server certificate file")
-	flag.StringVar(&keyfile, "key", "", "server key file")
 	flag.Parse()
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", home)
-	r.HandleFunc("/stations", handlerListStations).Methods(http.MethodGet)
+	logger := log.New(os.Stdout, "RIVERS-API", log.LstdFlags)
 
-	log.Println("starting server on :5000")
+	ih := handlers.NewInfo(logger)
+	sh := handlers.NewStations(logger)
+
+	// ServeMux
+	mux := http.NewServeMux()
+	mux.Handle("/", ih)
+	mux.Handle("/stations", sh)
 
 	server := http.Server{
 		Addr:         addr,
-		Handler:      r,
+		Handler:      mux,
+		ErrorLog:     logger,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
-	if err := server.ListenAndServeTLS(certfile, keyfile); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		logger.Printf("staring server on port %s\n", addr)
+
+		if err := server.ListenAndServe(); err != nil {
+			logger.Printf("error starting server: %s\n", err)
+			os.Exit(1)
+		}
+	}()
+
+	// wait for either interrupt or kill signals and shutdown server gracefully
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	// block and wait for the signal
+	sig := <-c
+	logger.Println("received signal:", sig)
+
+	// shutdown server gracefully but wait for 20 sec for current requests to complete
+	ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
+	server.Shutdown(ctx)
 }

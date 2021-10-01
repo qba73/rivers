@@ -14,10 +14,6 @@ import (
 
 func startServer(path string, datafile string, t *testing.T) *httptest.Server {
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		//if r.URL.Path != path {
-		//	t.Fatalf("incorrect URL: got %q", r.URL.Path)
-		//}
-
 		f, err := os.Open(datafile)
 		if err != nil {
 			t.Fatal(err)
