@@ -3,6 +3,8 @@ package rivers
 import (
 	"encoding/json"
 	"io"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -175,4 +177,71 @@ func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
 	}
 	s.Features = features
 	return s
+}
+
+// ===============================================================
+// Station Handlers & Data
+type StationsHandler struct {
+	l *log.Logger
+}
+
+func NewStationsHandler(l *log.Logger) StationsHandler {
+	return StationsHandler{l}
+}
+
+func (s StationsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	sx := GetGaugeStations()
+	if err := sx.ToJSON(w); err != nil {
+		http.Error(w, "error mashaling json", http.StatusInternalServerError)
+	}
+}
+
+type GaugeStation struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	River     string `json:"river"`
+	UpdatedOn string `json:"updated_on"`
+}
+
+type GaugeStations []*GaugeStation
+
+func (s *GaugeStations) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(s)
+}
+
+func GetGaugeStations() GaugeStations {
+	return stationList
+}
+
+var stationList = []*GaugeStation{
+	{
+		ID:        "001",
+		Name:      "Station1",
+		River:     "Shannon",
+		UpdatedOn: "",
+	},
+	{
+		ID:        "002",
+		Name:      "Station2",
+		River:     "Shanon",
+		UpdatedOn: "",
+	},
+}
+
+func ListStations(w http.ResponseWriter, r *http.Request) error {
+	stations, err := LoadStations("latesttest.json")
+	if err != nil {
+		return err
+	}
+	riverStations := stations.All()
+
+	output, err := json.Marshal(&riverStations)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(output)
+	return nil
 }

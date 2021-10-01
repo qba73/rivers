@@ -1,4 +1,4 @@
-package handlers
+package rivers
 
 import (
 	"fmt"

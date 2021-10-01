@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
@@ -10,30 +9,12 @@ import (
 	"os/signal"
 	"time"
 
-	river "github.com/qba73/rivers"
-	"github.com/qba73/rivers/cmd/rivers-api/handlers"
+	"github.com/qba73/rivers"
 )
 
 var (
 	addr string
 )
-
-func ListStations(w http.ResponseWriter, r *http.Request) error {
-	stations, err := river.LoadStations("latesttest.json")
-	if err != nil {
-		return err
-	}
-	riverStations := stations.All()
-
-	output, err := json.Marshal(&riverStations)
-	if err != nil {
-		return err
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(output)
-	return nil
-}
 
 func main() {
 	flag.StringVar(&addr, "addr", ":5000", ":5000")
@@ -41,8 +22,9 @@ func main() {
 
 	logger := log.New(os.Stdout, "RIVERS-API", log.LstdFlags)
 
-	ih := handlers.NewInfo(logger)
-	sh := handlers.NewStations(logger)
+	ih := rivers.NewInfo(logger)
+	// sh := handlers.NewStations(logger)
+	sh := rivers.NewStationsHandler(logger)
 
 	// ServeMux
 	mux := http.NewServeMux()
