@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/qba73/rivers"
 )
 
@@ -20,17 +21,17 @@ func main() {
 	flag.StringVar(&addr, "addr", ":5000", ":5000")
 	flag.Parse()
 
-	logger := log.New(os.Stdout, "RIVERS-API", log.LstdFlags)
+	logger := log.New(os.Stdout, "RIVERS-API ", log.LstdFlags)
 
-	ih := rivers.NewInfo(logger)
-	// sh := handlers.NewStations(logger)
-	sh := rivers.NewStationsHandler(logger)
+	ih := rivers.NewVersionHandler(logger)
 
 	// ServeMux
-	mux := http.NewServeMux()
-	mux.Handle("/", ih)
-	mux.Handle("/stations", sh)
+	mux := mux.NewRouter()
 
+	// Inforamtion about API version
+	mux.HandleFunc("/info", ih.GetVersion).Methods(http.MethodGet)
+
+	// Server
 	server := http.Server{
 		Addr:         addr,
 		Handler:      mux,

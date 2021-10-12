@@ -3,7 +3,7 @@
 ROOT				:= $(PWD)
 GO_HTML_COV 		:= ./coverage.html
 GO_TEST_OUTFILE 	:= ./c.out
-GO_DOCKER_IMAGE 	:= golang:1.16
+GO_DOCKER_IMAGE 	:= golang:1.17
 GO_DOCKER_CONTAINER := rivers-container
 CC_TEST_REPORTER_ID := ${CC_TEST_REPORTER_ID}
 CC_PREFIX 			:= github.com/qba73/rivers
@@ -47,7 +47,7 @@ tidy: ## Run go mod tidy and vendor
 # Rivers API
 
 runapi: ## Run Rivers API Server locally
-	go run cmd/rivers-api/main.go -cert $(SSL_CERT) -key $(SSL_KEY)
+	go run cmd/api/main.go
 
 clean: ## Remove docker container if exist
 	docker rm -f ${GO_DOCKER_CONTAINER} || true
