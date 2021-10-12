@@ -20,3 +20,10 @@
 
 # DynamoDB local
 docker/
+
+# Coverage report in html
+*.html
+
+# SQL files
+*.sql
+

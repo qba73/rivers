@@ -114,6 +114,12 @@ type StationsLatest struct {
 	Features []FeatureLatest `json:"features"`
 }
 
+// ToJSON knows how to encode latest stations to json.
+func (s StationsLatest) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(s)
+}
+
 // All knows how to return all gauge stations.
 func (s StationsLatest) All() StationsLatest {
 	return s
@@ -180,19 +186,26 @@ func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
 }
 
 // ===============================================================
-// Station Handlers & Data
+// Station Handlers
+
 type StationsHandler struct {
 	l *log.Logger
 }
 
-func NewStationsHandler(l *log.Logger) StationsHandler {
-	return StationsHandler{l}
+func NewStationsHandler(l *log.Logger) *StationsHandler {
+	return &StationsHandler{l}
 }
 
-func (s StationsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	sx := GetGaugeStations()
+func (s *StationsHandler) GetStations(w http.ResponseWriter, r *http.Request) {
+	stations, err := LoadStations("testdata/latesttest.json")
+	if err != nil {
+		http.Error(w, "unable to load stations", http.StatusInternalServerError)
+	}
+	sx := stations.All()
+	w.Header().Set("Content-Type", "application/json")
 	if err := sx.ToJSON(w); err != nil {
-		http.Error(w, "error mashaling json", http.StatusInternalServerError)
+		http.Error(w, "unable to marshal json", http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -229,19 +242,15 @@ var stationList = []*GaugeStation{
 	},
 }
 
-func ListStations(w http.ResponseWriter, r *http.Request) error {
+func GetStations(w http.ResponseWriter, r *http.Request) {
 	stations, err := LoadStations("latesttest.json")
 	if err != nil {
-		return err
+		http.Error(w, "unable to load stations", http.StatusInternalServerError)
 	}
-	riverStations := stations.All()
-
-	output, err := json.Marshal(&riverStations)
-	if err != nil {
-		return err
-	}
-
+	sx := stations.All()
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(output)
-	return nil
+	if err := sx.ToJSON(w); err != nil {
+		http.Error(w, "unable to marshal json", http.StatusInternalServerError)
+		return
+	}
 }

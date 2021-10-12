@@ -24,12 +24,14 @@ func main() {
 	logger := log.New(os.Stdout, "RIVERS-API ", log.LstdFlags)
 
 	ih := rivers.NewVersionHandler(logger)
+	sh := rivers.NewStationsHandler(logger)
 
 	// ServeMux
 	mux := mux.NewRouter()
 
 	// Inforamtion about API version
 	mux.HandleFunc("/info", ih.GetVersion).Methods(http.MethodGet)
+	mux.HandleFunc("/stations", sh.GetStations).Methods(http.MethodGet)
 
 	// Server
 	server := http.Server{
@@ -50,11 +52,11 @@ func main() {
 		}
 	}()
 
-	// wait for either interrupt or kill signals and shutdown server gracefully
+	// Wait for signals to shutdown the server gracefully.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
-	// block and wait for the signal
+	// Block and wait for the signal.
 	sig := <-c
 	logger.Println("received signal:", sig)
 
