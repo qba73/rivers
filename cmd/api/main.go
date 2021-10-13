@@ -32,6 +32,7 @@ func main() {
 	// Inforamtion about API version
 	mux.HandleFunc("/info", ih.GetVersion).Methods(http.MethodGet)
 	mux.HandleFunc("/stations", sh.GetStations).Methods(http.MethodGet)
+	mux.HandleFunc("/stations/{id:[0-9]+}", sh.GetStationsByID).Methods(http.MethodGet)
 
 	// Server
 	server := http.Server{

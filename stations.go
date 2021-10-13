@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -51,7 +53,7 @@ func ReadStations(r io.Reader) (StationsLatest, error) {
 type Stations struct {
 	Type     string    `json:"type"`
 	Crs      Crs       `json:"crs"`
-	Features []Feature `json:"features"`
+	Features []Feature `json:"features,omitempty"`
 }
 
 // Crs represents CRS property.
@@ -111,7 +113,7 @@ type Geometry struct {
 type StationsLatest struct {
 	Type     string          `json:"type"`
 	Crs      Crs             `json:"crs"`
-	Features []FeatureLatest `json:"features"`
+	Features []FeatureLatest `json:"features,omitempty"`
 }
 
 // ToJSON knows how to encode latest stations to json.
@@ -188,6 +190,8 @@ func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
 // ===============================================================
 // Station Handlers
 
+type KeyProduct struct{}
+
 type StationsHandler struct {
 	l *log.Logger
 }
@@ -209,48 +213,19 @@ func (s *StationsHandler) GetStations(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type GaugeStation struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	River     string `json:"river"`
-	UpdatedOn string `json:"updated_on"`
-}
-
-type GaugeStations []*GaugeStation
-
-func (s *GaugeStations) ToJSON(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(s)
-}
-
-func GetGaugeStations() GaugeStations {
-	return stationList
-}
-
-var stationList = []*GaugeStation{
-	{
-		ID:        "001",
-		Name:      "Station1",
-		River:     "Shannon",
-		UpdatedOn: "",
-	},
-	{
-		ID:        "002",
-		Name:      "Station2",
-		River:     "Shanon",
-		UpdatedOn: "",
-	},
-}
-
-func GetStations(w http.ResponseWriter, r *http.Request) {
-	stations, err := LoadStations("latesttest.json")
+func (s *StationsHandler) GetStationsByID(w http.ResponseWriter, r *http.Request) {
+	stations, err := LoadStations("testdata/latesttest.json")
 	if err != nil {
 		http.Error(w, "unable to load stations", http.StatusInternalServerError)
 	}
-	sx := stations.All()
+
+	vars := mux.Vars(r)
+	refid := vars["id"]
+
+	sx := stations.ByRefID(refid)
 	w.Header().Set("Content-Type", "application/json")
 	if err := sx.ToJSON(w); err != nil {
-		http.Error(w, "unable to marshal json", http.StatusInternalServerError)
+		http.Error(w, "unable to load stations", http.StatusInternalServerError)
 		return
 	}
 }
