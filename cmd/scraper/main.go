@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	log.Println("SCRAPE START")
+	log.Println("SCRAPER START")
 }

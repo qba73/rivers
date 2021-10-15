@@ -4,7 +4,6 @@ package rivers
 // located in the geographical area of Ireland.
 type GaugeGroup int
 
-/*
 var groupID = map[string]int{
 	"Nore":                    1,
 	"Shannon":                 2,
@@ -34,13 +33,12 @@ var groupID = map[string]int{
 	"WaterfordCity":           27,
 	"SouthGalway":             28,
 }
-*/
 
 // Group represents a group of stations located in a geographical area.
 type Group struct {
-	Name     string    `json:"group_name"`
-	ID       int       `json:"group_id"`
-	Readings []Reading `json:"stations"`
+	Name     string    `json:"name"`
+	ID       int       `json:"id"`
+	Readings []Reading `json:"stations,omitempty"`
 }
 
 // Reading represents a sensor reading for
@@ -49,4 +47,14 @@ type Group struct {
 type Reading struct {
 	Name  string
 	Value float64
+}
+
+type Groups []*Group
+
+func (g Groups) GetNameByID(id int) (string, error) {
+	return "", nil
+}
+
+func (g Groups) GetID(name string) (int, error) {
+	return 0, nil
 }
