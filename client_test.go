@@ -25,58 +25,6 @@ func startServer(path string, datafile string, t *testing.T) *httptest.Server {
 	return ts
 }
 
-func TestGetStations(t *testing.T) {
-	t.Parallel()
-
-	ts := startServer("/geojson/", "testdata/stations_short.json", t)
-	defer ts.Close()
-
-	client := rivers.NewClient()
-	client.BaseURL = ts.URL
-
-	got, err := client.GetStations()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	want := rivers.Stations{
-		Type: "FeatureCollection",
-		Crs: rivers.Crs{
-			Type: "name",
-			Properties: rivers.CrsProperty{
-				Name: "EPSG:4326"},
-		},
-		Features: []rivers.Feature{
-			{
-				Type: "Feature",
-				Properties: rivers.Property{
-					Name: "Sandy Mills",
-					Ref:  "0000001041",
-				},
-				Geometry: rivers.Geometry{
-					Type:        "Point",
-					Coordinates: []float64{-7.575758, 54.838318},
-				},
-			},
-			{
-				Type: "Feature",
-				Properties: rivers.Property{
-					Name: "Ballybofey",
-					Ref:  "0000001043",
-				},
-				Geometry: rivers.Geometry{
-					Type:        "Point",
-					Coordinates: []float64{-7.790749, 54.799769},
-				},
-			},
-		},
-	}
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
 func TestGetLatest(t *testing.T) {
 	t.Parallel()
 
@@ -91,18 +39,16 @@ func TestGetLatest(t *testing.T) {
 		t.Fatalf("GetLatest() got error %v", err)
 	}
 
-	want := rivers.StationsLatest{
+	want := rivers.StationsLatestGeo{
 		Type: "FeatureCollection",
 		Crs: rivers.Crs{
-			Type: "name",
-			Properties: rivers.CrsProperty{
-				Name: "EPSG:4326",
-			},
+			Type:       "name",
+			Properties: map[string]string{"name": "EPSG:4326"},
 		},
-		Features: []rivers.FeatureLatest{
+		Features: []rivers.FeatureLatestGeo{
 			{
 				Type: "Feature",
-				Properties: rivers.PropertyLatest{
+				Properties: rivers.PropertyLatestGeo{
 					StationRef:  "0000001041",
 					StationName: "Sandy Mills",
 					SensorRef:   "0001",
@@ -113,14 +59,14 @@ func TestGetLatest(t *testing.T) {
 					URL:         "/0000001041/0001/",
 					CSVFile:     "/data/month/01041_0001.csv",
 				},
-				Geometry: rivers.Geometry{
+				Geometry: rivers.GeometryGeo{
 					Type:        "Point",
 					Coordinates: []float64{-7.575758, 54.838318},
 				},
 			},
 			{
 				Type: "Feature",
-				Properties: rivers.PropertyLatest{
+				Properties: rivers.PropertyLatestGeo{
 					StationRef:  "0000001041",
 					StationName: "Sandy Mills",
 					SensorRef:   "0002",
@@ -131,14 +77,14 @@ func TestGetLatest(t *testing.T) {
 					URL:         "/0000001041/0002/",
 					CSVFile:     "/data/month/01041_0002.csv",
 				},
-				Geometry: rivers.Geometry{
+				Geometry: rivers.GeometryGeo{
 					Type:        "Point",
 					Coordinates: []float64{-7.575758, 54.838318},
 				},
 			},
 			{
 				Type: "Feature",
-				Properties: rivers.PropertyLatest{
+				Properties: rivers.PropertyLatestGeo{
 					StationRef:  "0000001041",
 					StationName: "Sandy Mills",
 					SensorRef:   "0003",
@@ -149,14 +95,14 @@ func TestGetLatest(t *testing.T) {
 					URL:         "/0000001041/0003/",
 					CSVFile:     "/data/month/01041_0003.csv",
 				},
-				Geometry: rivers.Geometry{
+				Geometry: rivers.GeometryGeo{
 					Type:        "Point",
 					Coordinates: []float64{-7.575758, 54.838318},
 				},
 			},
 			{
 				Type: "Feature",
-				Properties: rivers.PropertyLatest{
+				Properties: rivers.PropertyLatestGeo{
 					StationRef:  "0000001041",
 					StationName: "Sandy Mills",
 					SensorRef:   "OD",
@@ -167,7 +113,7 @@ func TestGetLatest(t *testing.T) {
 					URL:         "/0000001041/OD/",
 					CSVFile:     "/data/month/01041_OD.csv",
 				},
-				Geometry: rivers.Geometry{
+				Geometry: rivers.GeometryGeo{
 					Type:        "Point",
 					Coordinates: []float64{-7.575758, 54.838318},
 				},

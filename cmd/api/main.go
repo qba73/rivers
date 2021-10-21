@@ -23,8 +23,14 @@ func main() {
 
 	logger := log.New(os.Stdout, "RIVERS-API ", log.LstdFlags)
 
+	store, err := rivers.NewJSONStore("testdata/latest.json")
+	if err != nil {
+		logger.Printf("error accessing store: %s\n", err)
+		os.Exit(1)
+	}
+
 	ih := rivers.NewVersionHandler(logger)
-	sh := rivers.NewStationsHandler(logger)
+	sh := rivers.NewStationsHandler(logger, store)
 
 	// ServeMux
 	mux := mux.NewRouter()

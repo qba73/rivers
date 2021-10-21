@@ -1,5 +1,7 @@
 package rivers
 
+import "fmt"
+
 // GaugeGroup represents a group of measuring stations
 // located in the geographical area of Ireland.
 type GaugeGroup int
@@ -49,12 +51,16 @@ type Reading struct {
 	Value float64
 }
 
-type Groups []*Group
+type Groups []Group
 
-func (g Groups) GetNameByID(id int) (string, error) {
+func (g Groups) GetName(id int) (string, error) {
 	return "", nil
 }
 
 func (g Groups) GetID(name string) (int, error) {
-	return 0, nil
+	id, ok := groupID[name]
+	if !ok {
+		return 0, fmt.Errorf("invalida group name: %s", name)
+	}
+	return id, nil
 }

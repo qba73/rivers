@@ -5,20 +5,21 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
 
 // FeatureLatest represents a feature with properties describing
 // latest readings from a sensor identified by ID.
-type FeatureLatest struct {
-	Type       string         `json:"type"`
-	Properties PropertyLatest `json:"properties"`
-	Geometry   Geometry       `json:"geometry"`
+type FeatureLatestGeo struct {
+	Type       string            `json:"type"`
+	Properties PropertyLatestGeo `json:"properties"`
+	Geometry   GeometryGeo       `json:"geometry"`
 }
 
-// PropertyLatest represents properties of a single gauge station.
-type PropertyLatest struct {
+// PropertyLatestGeo represents properties of a single gauge station.
+type PropertyLatestGeo struct {
 	StationRef  string `json:"station_ref"`
 	StationName string `json:"station_name"`
 	SensorRef   string `json:"sensor_ref"`
@@ -30,36 +31,41 @@ type PropertyLatest struct {
 	CSVFile     string `json:"csv_file"`
 }
 
-// Geometry represents geometry coordinates of a gauge station.
-type Geometry struct {
+// GeometryGeo represents geometry coordinates of a gauge station.
+type GeometryGeo struct {
 	Type        string    `json:"type"`
 	Coordinates []float64 `json:"coordinates"`
 }
 
+type Crs struct {
+	Type       string            `json:"type"`
+	Properties map[string]string `json:"properties"`
+}
+
 // StationsLatest represents geojson data describing
 // all gauge stations and coordinates data.
-type StationsLatest struct {
-	Type     string          `json:"type"`
-	Crs      Crs             `json:"crs"`
-	Features []FeatureLatest `json:"features,omitempty"`
+type StationsLatestGeo struct {
+	Type     string             `json:"type"`
+	Crs      Crs                `json:"crs"`
+	Features []FeatureLatestGeo `json:"features,omitempty"`
 }
 
 // ToJSON knows how to encode latest stations to json.
-func (s StationsLatest) ToJSON(w io.Writer) error {
+func (s StationsLatestGeo) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(s)
 }
 
 // All knows how to return all gauge stations.
-func (s StationsLatest) All() StationsLatest {
+func (s StationsLatestGeo) GetAll() StationsLatestGeo {
 	return s
 }
 
-// ByName takes a feature (station) name and
+// GetByName takes a feature (station) name and
 // returns the Feature struct. If provided name is not
 // found it returns an empty Feature.
-func (s StationsLatest) ByName(name string) StationsLatest {
-	var features []FeatureLatest
+func (s StationsLatestGeo) GetByName(name string) StationsLatestGeo {
+	var features []FeatureLatestGeo
 
 	for _, f := range s.Features {
 		if f.Properties.StationName == name {
@@ -70,12 +76,12 @@ func (s StationsLatest) ByName(name string) StationsLatest {
 	return s
 }
 
-// ByRefID takes station ID and returns
+// GetByRefID takes station ID and returns
 // matching features (stations). If Station Ref number does
 // not exist it returns Stations struct with empty list of
 // Features (stations/sensors).
-func (s StationsLatest) ByRefID(ref string) StationsLatest {
-	var features []FeatureLatest
+func (s StationsLatestGeo) GetByID(ref string) StationsLatestGeo {
+	var features []FeatureLatestGeo
 
 	for _, f := range s.Features {
 		if f.Properties.StationRef == ref {
@@ -86,11 +92,11 @@ func (s StationsLatest) ByRefID(ref string) StationsLatest {
 	return s
 }
 
-// ByStationAndSensorRef takes sensor ID and returns matching features
+// GetByStationAndSensorRef takes sensor ID and returns matching features
 // (stations). If the sensor ID doesn't exist it returns Stations
 // struct with an empty list of Fetures (stations/sensors).
-func (s StationsLatest) ByStationAndSensorRef(station, sensor string) StationsLatest {
-	var features []FeatureLatest
+func (s StationsLatestGeo) GetByStationAndSensorRef(station, sensor string) StationsLatestGeo {
+	var features []FeatureLatestGeo
 
 	for _, f := range s.Features {
 		if f.Properties.StationRef == station && f.Properties.SensorRef == sensor {
@@ -103,8 +109,8 @@ func (s StationsLatest) ByStationAndSensorRef(station, sensor string) StationsLa
 
 // ByRegionID knows how to return stations assigned
 // to the given region identified by regionID.
-func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
-	var features []FeatureLatest
+func (s StationsLatestGeo) GetByRegionID(regionID int) StationsLatestGeo {
+	var features []FeatureLatestGeo
 
 	for _, f := range s.Features {
 		if f.Properties.RegionID == regionID {
@@ -115,25 +121,58 @@ func (s StationsLatest) ByRegionID(regionID int) StationsLatest {
 	return s
 }
 
+// LoadStationsLatest knows how to read stations json file with
+// the latest results. It takes a path to the json file and returns
+// a struct Stations identified as geographical 'Features' in GeoJSON terms.
+func LoadStationsLatest(name string) (StationsLatestGeo, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return StationsLatestGeo{}, err
+	}
+	defer f.Close()
+	return ReadStationsLatestFromJSON(f)
+}
+
+// ReadStationsLatestFromJSON knows how to unmarshal latest stations.
+func ReadStationsLatestFromJSON(r io.Reader) (StationsLatestGeo, error) {
+	var s StationsLatestGeo
+	if err := json.NewDecoder(r).Decode(&s); err != nil {
+		return StationsLatestGeo{}, err
+	}
+	return s, nil
+}
+
 // ===============================================================
 // Station Handlers
 
-type KeyProduct struct{}
+type StationLatestStore interface {
+	GetAll() StationsLatestGeo
+	GetByID(id string) StationsLatestGeo
+}
+
+type JSONStore struct {
+	Stations StationsLatestGeo
+}
+
+func NewJSONStore(pathname string) (StationsLatestGeo, error) {
+	stations, err := LoadStationsLatest(pathname)
+	if err != nil {
+		return StationsLatestGeo{}, err
+	}
+	return stations, nil
+}
 
 type StationsHandler struct {
-	l *log.Logger
+	l     *log.Logger
+	Store StationLatestStore
 }
 
-func NewStationsHandler(l *log.Logger) *StationsHandler {
-	return &StationsHandler{l}
+func NewStationsHandler(l *log.Logger, store StationLatestStore) *StationsHandler {
+	return &StationsHandler{l, store}
 }
 
-func (s *StationsHandler) GetStations(w http.ResponseWriter, r *http.Request) {
-	stations, err := LoadStations("testdata/latesttest.json")
-	if err != nil {
-		http.Error(w, "unable to load stations", http.StatusInternalServerError)
-	}
-	sx := stations.All()
+func (sh *StationsHandler) GetStations(w http.ResponseWriter, r *http.Request) {
+	sx := sh.Store.GetAll()
 	w.Header().Set("Content-Type", "application/json")
 	if err := sx.ToJSON(w); err != nil {
 		http.Error(w, "unable to marshal json", http.StatusInternalServerError)
@@ -142,7 +181,7 @@ func (s *StationsHandler) GetStations(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *StationsHandler) GetStationsByID(w http.ResponseWriter, r *http.Request) {
-	stations, err := LoadStations("testdata/latesttest.json")
+	stations, err := LoadStationsLatest("testdata/latesttest.json")
 	if err != nil {
 		http.Error(w, "unable to load stations", http.StatusInternalServerError)
 	}
@@ -150,7 +189,7 @@ func (s *StationsHandler) GetStationsByID(w http.ResponseWriter, r *http.Request
 	vars := mux.Vars(r)
 	refid := vars["id"]
 
-	sx := stations.ByRefID(refid)
+	sx := stations.GetByID(refid)
 	w.Header().Set("Content-Type", "application/json")
 	if err := sx.ToJSON(w); err != nil {
 		http.Error(w, "unable to load stations", http.StatusInternalServerError)

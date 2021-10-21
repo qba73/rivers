@@ -61,16 +61,16 @@ func (c *client) GetStations() (Stations, error) {
 // GetLatest knows how to return latest readings from water level,
 // water temperature and voltage level sensors installed in all
 // stations in rivers in Ireland.
-func (c *client) GetLatest() (StationsLatest, error) {
+func (c *client) GetLatest() (StationsLatestGeo, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
 	if err != nil {
-		return StationsLatest{}, err
+		return StationsLatestGeo{}, err
 	}
 
-	var s StationsLatest
+	var s StationsLatestGeo
 
 	if err := c.sendRequestJSON(req, &s); err != nil {
-		return StationsLatest{}, err
+		return StationsLatestGeo{}, err
 	}
 
 	return s, nil
@@ -123,8 +123,8 @@ func (c *client) GetMonthLevel(stationID string) ([]SensorReading, error) {
 
 // GetDayTemperature knows how to return water temperature
 // recorded for last 24hr period for the given stationID number.
-func (c *client) GetDayTemperature(statioID string) ([]SensorReading, error) {
-	url, err := c.urlTemperature(statioID, "day")
+func (c *client) GetDayTemperature(stationID string) ([]SensorReading, error) {
+	url, err := c.urlTemperature(stationID, "day")
 	if err != nil {
 		return nil, err
 	}

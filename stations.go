@@ -1,9 +1,7 @@
 package rivers
 
 import (
-	"encoding/json"
-	"io"
-	"os"
+	"time"
 )
 
 const (
@@ -12,67 +10,59 @@ const (
 	voltageSensor = 3
 )
 
+type Sensor struct {
+	RefID     string `json:"id"`
+	Type      string `json:"type"`
+	Value     string `json:"value"`
+	ErrorCode int    `json:"err_code"`
+}
+
 // Station is a measurement station
-// situated in the lat long location.
+// situated in a location identified by
+// lat and long coordinates.
 type Station struct {
-	Name  string
-	RefNo string
-	Lat   float64
-	Long  float64
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	RegionID   int       `json:"region_id"`
+	RegionName string    `json:"region_name"`
+	Datetime   time.Time `json:"datetime"`
+	Lat        float64   `json:"lat"`
+	Long       float64   `json:"long"`
+	Sensors    []Sensor  `json:"sensors"`
 }
 
-// LoadStations knows how to read stations json file.
-// It takes a path to the json file and returns
-// a struct Stations identified as geographical
-// 'Features' in GeoJSON terms.
-func LoadStations(name string) (StationsLatest, error) {
-	f, err := os.Open(name)
+// Stations represent all stations installed in rivers.
+type Stations []Station
+
+func NewStations() (Stations, error) {
+	//stations, err := LoadStationsLatest("testdata/latestjson")
+	return Stations{}, nil
+}
+
+func (s Stations) GetAll() Stations {
+	return Stations{}
+}
+
+func (s Stations) GetByName(name string) Stations {
+	return Stations{}
+}
+
+func (s Stations) GetByRefID(refid string) Stations {
+	return Stations{}
+}
+
+func (s Stations) GetByRegionID(regionID int) Stations {
+	return Stations{}
+}
+
+func (s Stations) GetByRegionName(region string) Stations {
+	return Stations{}
+}
+
+func GetAllStations() (Stations, error) {
+	stations, err := NewStations()
 	if err != nil {
-		return StationsLatest{}, err
+		return Stations{}, err
 	}
-	defer f.Close()
-	return ReadStations(f)
-}
-
-// ReadStations knows how to unmarshal stations.
-func ReadStations(r io.Reader) (StationsLatest, error) {
-	var s StationsLatest
-
-	if err := json.NewDecoder(r).Decode(&s); err != nil {
-		return StationsLatest{}, err
-	}
-
-	return s, nil
-}
-
-// Stations represents station data.
-type Stations struct {
-	Type     string    `json:"type"`
-	Crs      Crs       `json:"crs"`
-	Features []Feature `json:"features,omitempty"`
-}
-
-// Crs represents CRS property.
-type Crs struct {
-	Type       string      `json:"type"`
-	Properties CrsProperty `json:"properties"`
-}
-
-// CrsProperty is a property name.
-type CrsProperty struct {
-	Name string `json:"name"`
-}
-
-// Feature represents a feature with properties describing
-// gauge name and gauge ID.
-type Feature struct {
-	Type       string   `json:"type"`
-	Properties Property `json:"properties"`
-	Geometry   Geometry `json:"geometry"`
-}
-
-// Property represents feature property.
-type Property struct {
-	Name string `json:"name"`
-	Ref  string `json:"ref"`
+	return stations, nil
 }
