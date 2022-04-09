@@ -1,12 +1,12 @@
 .PHONY: help check cover test tidy
 
-ROOT				:= $(PWD)
-GO_HTML_COV 		:= ./coverage.html
-GO_TEST_OUTFILE 	:= ./c.out
-GO_DOCKER_IMAGE 	:= golang:1.17
+ROOT := $(PWD)
+GO_HTML_COV := ./coverage.html
+GO_TEST_OUTFILE := ./c.out
+GO_DOCKER_IMAGE := golang:1.18
 GO_DOCKER_CONTAINER := rivers-container
 CC_TEST_REPORTER_ID := ${CC_TEST_REPORTER_ID}
-CC_PREFIX 			:= github.com/qba73/rivers
+CC_PREFIX := github.com/qba73/rivers
 
 SSL_CERT := ~/.ssl/localhost.crt
 SSL_KEY := ~/.ssl/localhost.key
@@ -36,7 +36,7 @@ cover: ## Run unit tests and generate test coverage report
 	staticcheck ./...
 
 test: ## Run unit tests locally
-	go test -v ./... -count=1
+	go test -v ./... -count=1 -race -shuffle=on
 	staticcheck ./...
 
 # MODULES

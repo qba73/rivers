@@ -21,13 +21,11 @@ func startServer(path string, datafile string, t *testing.T) *httptest.Server {
 		defer f.Close()
 		io.Copy(rw, f)
 	}))
-
 	return ts
 }
 
 func TestGetLatest(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/geojson/latest", "testdata/latest_short.json", t)
 	defer ts.Close()
 
@@ -39,85 +37,42 @@ func TestGetLatest(t *testing.T) {
 		t.Fatalf("GetLatest() got error %v", err)
 	}
 
-	want := rivers.StationsLatestGeo{
-		Type: "FeatureCollection",
-		Crs: rivers.Crs{
-			Type:       "name",
-			Properties: map[string]string{"name": "EPSG:4326"},
+	want := []rivers.LatestReading{
+		{
+			StationID:   "0000001041",
+			StationName: "Sandy Mills",
+			SensorID:    "0001",
+			RegionID:    3,
+			Timestamp:   "2021-02-18T06:00:00Z",
+			Value:       "1.715",
+			ErrCode:     99,
 		},
-		Features: []rivers.FeatureLatestGeo{
-			{
-				Type: "Feature",
-				Properties: rivers.PropertyLatestGeo{
-					StationRef:  "0000001041",
-					StationName: "Sandy Mills",
-					SensorRef:   "0001",
-					RegionID:    3,
-					Timestamp:   "2021-02-18T06:00:00Z",
-					Value:       "1.715",
-					ErrCode:     99,
-					URL:         "/0000001041/0001/",
-					CSVFile:     "/data/month/01041_0001.csv",
-				},
-				Geometry: rivers.GeometryGeo{
-					Type:        "Point",
-					Coordinates: []float64{-7.575758, 54.838318},
-				},
-			},
-			{
-				Type: "Feature",
-				Properties: rivers.PropertyLatestGeo{
-					StationRef:  "0000001041",
-					StationName: "Sandy Mills",
-					SensorRef:   "0002",
-					RegionID:    3,
-					Timestamp:   "2021-02-18T06:00:00Z",
-					Value:       "4.800",
-					ErrCode:     99,
-					URL:         "/0000001041/0002/",
-					CSVFile:     "/data/month/01041_0002.csv",
-				},
-				Geometry: rivers.GeometryGeo{
-					Type:        "Point",
-					Coordinates: []float64{-7.575758, 54.838318},
-				},
-			},
-			{
-				Type: "Feature",
-				Properties: rivers.PropertyLatestGeo{
-					StationRef:  "0000001041",
-					StationName: "Sandy Mills",
-					SensorRef:   "0003",
-					RegionID:    3,
-					Timestamp:   "2021-02-18T06:00:00Z",
-					Value:       "13.000",
-					ErrCode:     99,
-					URL:         "/0000001041/0003/",
-					CSVFile:     "/data/month/01041_0003.csv",
-				},
-				Geometry: rivers.GeometryGeo{
-					Type:        "Point",
-					Coordinates: []float64{-7.575758, 54.838318},
-				},
-			},
-			{
-				Type: "Feature",
-				Properties: rivers.PropertyLatestGeo{
-					StationRef:  "0000001041",
-					StationName: "Sandy Mills",
-					SensorRef:   "OD",
-					RegionID:    3,
-					Timestamp:   "2021-02-18T06:00:00Z",
-					Value:       "8.060",
-					ErrCode:     99,
-					URL:         "/0000001041/OD/",
-					CSVFile:     "/data/month/01041_OD.csv",
-				},
-				Geometry: rivers.GeometryGeo{
-					Type:        "Point",
-					Coordinates: []float64{-7.575758, 54.838318},
-				},
-			},
+		{
+			StationID:   "0000001041",
+			StationName: "Sandy Mills",
+			SensorID:    "0002",
+			RegionID:    3,
+			Timestamp:   "2021-02-18T06:00:00Z",
+			Value:       "4.800",
+			ErrCode:     99,
+		},
+		{
+			StationID:   "0000001041",
+			StationName: "Sandy Mills",
+			SensorID:    "0003",
+			RegionID:    3,
+			Timestamp:   "2021-02-18T06:00:00Z",
+			Value:       "13.000",
+			ErrCode:     99,
+		},
+		{
+			StationID:   "0000001041",
+			StationName: "Sandy Mills",
+			SensorID:    "OD",
+			RegionID:    3,
+			Timestamp:   "2021-02-18T06:00:00Z",
+			Value:       "8.060",
+			ErrCode:     99,
 		},
 	}
 
@@ -128,7 +83,6 @@ func TestGetLatest(t *testing.T) {
 
 func TestGetDayLevel(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/day", "testdata/day_01041_0001.csv", t)
 	defer ts.Close()
 

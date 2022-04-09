@@ -1,9 +1,7 @@
 package main
 
-import (
-	"log"
-)
+import "github.com/qba73/rivers"
 
 func main() {
-	log.Println("SCRAPER START")
+	rivers.RunScraper()
 }
