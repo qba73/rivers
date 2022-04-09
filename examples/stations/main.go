@@ -7,12 +7,10 @@ import (
 )
 
 func main() {
-	c := rivers.NewClient()
-
-	stations, err := c.GetStations()
+	readings, err := rivers.GetLatest()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(stations)
+	fmt.Println(readings)
 }
