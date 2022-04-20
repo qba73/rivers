@@ -32,53 +32,32 @@ func TestGetLatest(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	got, err := client.GetLatest()
+	got, err := client.GetLatestWaterLevels()
 	if err != nil {
 		t.Fatalf("GetLatest() got error %v", err)
 	}
 
-	want := []rivers.LatestReading{
+	want := []rivers.StationWaterLevelReading{
 		{
-			StationID:   "0000001041",
-			StationName: "Sandy Mills",
-			SensorID:    "0001",
-			RegionID:    3,
-			Timestamp:   "2021-02-18T06:00:00Z",
-			Value:       "1.715",
-			ErrCode:     99,
-		},
-		{
-			StationID:   "0000001041",
-			StationName: "Sandy Mills",
-			SensorID:    "0002",
-			RegionID:    3,
-			Timestamp:   "2021-02-18T06:00:00Z",
-			Value:       "4.800",
-			ErrCode:     99,
-		},
-		{
-			StationID:   "0000001041",
-			StationName: "Sandy Mills",
-			SensorID:    "0003",
-			RegionID:    3,
-			Timestamp:   "2021-02-18T06:00:00Z",
-			Value:       "13.000",
-			ErrCode:     99,
-		},
-		{
-			StationID:   "0000001041",
-			StationName: "Sandy Mills",
-			SensorID:    "OD",
-			RegionID:    3,
-			Timestamp:   "2021-02-18T06:00:00Z",
-			Value:       "8.060",
-			ErrCode:     99,
+			StationID:  "0000001041",
+			Readtime:   time.Date(2021, 02, 18, 06, 00, 00, 00, time.UTC),
+			WaterLevel: 1.715,
 		},
 	}
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+}
+
+func TestGetLatestWaterLevels(t *testing.T) {
+	t.Parallel()
+	ts := startServer("/geojson/latest", "testdata_latest_short.json", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
 }
 
 func TestGetDayLevel(t *testing.T) {
@@ -91,20 +70,20 @@ func TestGetDayLevel(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			0.294,
+			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
+			Value:     0.294,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 	}
 
@@ -130,20 +109,20 @@ func TestGetWeekLevel(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			0.294,
+			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
+			Value:     0.294,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 	}
 
@@ -169,20 +148,20 @@ func TestGetMonthLevel(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			0.294,
+			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
+			Value:     0.294,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 		{
-			time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			0.293,
+			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
+			Value:     0.293,
 		},
 	}
 
@@ -208,16 +187,16 @@ func TestGetDayTemperature(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
-			19.900,
+			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			Value:     19.900,
 		},
 		{
-			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
-			19.700,
+			Timestamp: time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			Value:     19.700,
 		},
 		{
-			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
-			19.400,
+			Timestamp: time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			Value:     19.400,
 		},
 	}
 
@@ -243,16 +222,16 @@ func TestGetWeekTemperature(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
-			19.900,
+			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			Value:     19.900,
 		},
 		{
-			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
-			19.700,
+			Timestamp: time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			Value:     19.700,
 		},
 		{
-			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
-			19.400,
+			Timestamp: time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			Value:     19.400,
 		},
 	}
 
@@ -278,16 +257,16 @@ func TestGetMonthTemperature(t *testing.T) {
 
 	want := []rivers.SensorReading{
 		{
-			time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
-			19.900,
+			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
+			Value:     19.900,
 		},
 		{
-			time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
-			19.700,
+			Timestamp: time.Date(2021, 07, 15, 23, 00, 00, 00, time.UTC),
+			Value:     19.700,
 		},
 		{
-			time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
-			19.400,
+			Timestamp: time.Date(2021, 07, 16, 00, 00, 00, 00, time.UTC),
+			Value:     19.400,
 		},
 	}
 

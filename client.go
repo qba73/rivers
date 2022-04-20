@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -12,15 +13,34 @@ const (
 	levelSensor   = 1
 	tempSensor    = 2
 	voltageSensor = 3
+
+	sensorTypeLevel = "0001"
+	sensorTypeTemp  = "0002"
 )
 
-// Sensor holds data representing
-// a single sensor monted in a station.
+type response struct {
+	Features []struct {
+		Properties struct {
+			StationRef  string `json:"station_ref"`
+			StationName string `json:"station_name"`
+			SensorRef   string `json:"sensor_ref"`
+			RegionID    int    `json:"region_id"`
+			Datetime    string `json:"datetime"`
+			Value       string `json:"value"`
+			ErrCode     int    `json:"err_code"`
+		} `json:"properties"`
+	}
+}
+
+// Sensor holds data from a station.
 type Sensor struct {
-	ID        string `json:"id"`
-	Type      string `json:"type"`
-	Value     string `json:"value"`
-	ErrorCode int    `json:"err_code"`
+	StationID   string `json:"station_id"`
+	StationName string `json:"station_name"`
+	Type        string `json:"type"`
+	Value       string `json:"value"`
+	Timestamp   string `json:"timestamp"`
+	ErrorCode   int    `json:"err_code"`
+	RegionID    string `json:"region_id"`
 }
 
 // Station represents a station with
@@ -46,19 +66,18 @@ type errResponse struct {
 	Message string `json:"message"`
 }
 
-// LatestReading represents data received from a sensor.
-type LatestReading struct {
+// SensorReading represents data received from a sensor.
+type SensorReading struct {
 	StationID   string
 	StationName string
 	SensorID    string
 	RegionID    int
-	Value       string
-	Timestamp   string
+	Value       float64
+	Timestamp   time.Time
 	ErrCode     int
 }
 
-// Client holds data required to
-// communicate with a web service.
+// Client holds data required to communicate with the web service.
 type Client struct {
 	BaseURL    string
 	HTTPClient *http.Client
@@ -76,48 +95,42 @@ func NewClient() *Client {
 	}
 }
 
-// GetLatest knows how to return latest readings from water level,
-// water temperature and voltage level sensors installed in all
-// stations in rivers in Ireland.
-func (c *Client) GetLatest() ([]LatestReading, error) {
+// GetLatestWaterLevels returns latest water level readings from sensors.
+func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
 	if err != nil {
-		return []LatestReading{}, err
+		return []StationWaterLevelReading{}, err
 	}
 
-	var resp struct {
-		Features []struct {
-			Properties struct {
-				StationRef  string `json:"station_ref"`
-				StationName string `json:"station_name"`
-				SensorRef   string `json:"sensor_ref"`
-				RegionID    int    `json:"region_id"`
-				Datetime    string `json:"datetime"`
-				Value       string `json:"value"`
-				ErrCode     int    `json:"err_code"`
-			} `json:"properties"`
+	var res response
+	if err := c.sendRequestJSON(req, &res); err != nil {
+		return []StationWaterLevelReading{}, err
+	}
+
+	var out []StationWaterLevelReading
+
+	for _, p := range res.Features {
+		if p.Properties.SensorRef != sensorTypeLevel {
+			continue
 		}
-	}
 
-	if err := c.sendRequestJSON(req, &resp); err != nil {
-		return []LatestReading{}, err
-	}
-
-	out := make([]LatestReading, len(resp.Features))
-
-	for i, p := range resp.Features {
-		reading := LatestReading{
-			StationID:   p.Properties.StationRef,
-			StationName: p.Properties.StationName,
-			SensorID:    p.Properties.SensorRef,
-			RegionID:    p.Properties.RegionID,
-			Value:       p.Properties.Value,
-			Timestamp:   p.Properties.Datetime,
-			ErrCode:     p.Properties.ErrCode,
+		t, err := time.Parse(time.RFC3339, p.Properties.Datetime)
+		if err != nil {
+			return []StationWaterLevelReading{}, err
 		}
-		out[i] = reading
-	}
 
+		wl, err := strconv.ParseFloat(p.Properties.Value, 64)
+		if err != nil {
+			return []StationWaterLevelReading{}, err
+		}
+
+		reading := StationWaterLevelReading{
+			StationID:  p.Properties.StationRef,
+			Readtime:   t,
+			WaterLevel: wl,
+		}
+		out = append(out, reading)
+	}
 	return out, nil
 }
 
@@ -319,8 +332,8 @@ func fileNameVoltage(stationID string) string {
 	return fmt.Sprintf("%s_000%v.csv", stationID, voltageSensor)
 }
 
-// GetLatest returns latests reading from all stations.
-func GetLatest() ([]LatestReading, error) {
+// GetLatestLevels returns latests reading from all stations.
+func GetLatestLevels() ([]StationWaterLevelReading, error) {
 	c := NewClient()
-	return c.GetLatest()
+	return c.GetLatestWaterLevels()
 }

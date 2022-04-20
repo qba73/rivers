@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	readings, err := rivers.GetLatest()
+	readings, err := rivers.GetLatestLevels()
 	if err != nil {
 		fmt.Println(err)
 	}

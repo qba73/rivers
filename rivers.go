@@ -17,7 +17,7 @@ const (
 
 // SensorReading represents water level recorded
 // by a gauge at the particular time.
-type SensorReading struct {
+type Reading struct {
 	Timestamp time.Time
 	Value     float64
 }
@@ -88,4 +88,45 @@ func processValue(record []string) (float64, error) {
 		return 0, nil
 	}
 	return val, nil
+}
+
+type WaterLevelProvider interface {
+	GetLatestLevels() []StationWaterLevelReading
+}
+
+type WaterTemperatureProvider interface {
+	GetLatestTemperature() []StationWaterTempReading
+}
+
+type WaterDataProvider interface {
+	WaterLevelProvider
+	WaterTemperatureProvider
+}
+
+type StationWaterTempReading struct {
+	StationID   string
+	Readtime    time.Time
+	Temperature float64
+}
+
+type StationWaterLevelReading struct {
+	StationID  string
+	Readtime   time.Time
+	WaterLevel float64
+}
+
+type DataPuller struct {
+	DataProvider WaterLevelProvider
+}
+
+func NewDataPuller(wlp WaterLevelProvider) *DataPuller {
+	return &DataPuller{
+		DataProvider: wlp,
+	}
+}
+
+// RunServer holds all required machinery
+// to run the river web server.
+func RunServer() {
+	fmt.Println("Staring server...")
 }
