@@ -15,7 +15,7 @@ const (
 	GaugeTimeFormat = "2006-01-02 15:04"
 )
 
-// SensorReading represents water level recorded
+// Reading represents water level recorded
 // by a gauge at the particular time.
 type Reading struct {
 	Timestamp time.Time
@@ -24,7 +24,7 @@ type Reading struct {
 
 // LoadCSV knows how to open and read given csv file.
 // Upon successful run it returns a slice of level structs.
-func LoadCSV(path string) ([]SensorReading, error) {
+func LoadCSV(path string) ([]Reading, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -36,8 +36,8 @@ func LoadCSV(path string) ([]SensorReading, error) {
 // ReadCSV knows how to read a csv file containing
 // readings from a gauge in a format:
 // timestamp,level
-func ReadCSV(csvFile io.Reader) ([]SensorReading, error) {
-	var levels []SensorReading
+func ReadCSV(csvFile io.Reader) ([]Reading, error) {
+	var levels []Reading
 
 	r := csv.NewReader(csvFile)
 	// We are not interested in the CSV header. We read it
@@ -61,17 +61,17 @@ func ReadCSV(csvFile io.Reader) ([]SensorReading, error) {
 	return levels, nil
 }
 
-func processRecord(r []string) (SensorReading, error) {
+func processRecord(r []string) (Reading, error) {
 	tm, err := processTimestamp(r)
 	if err != nil {
-		return SensorReading{}, err
+		return Reading{}, err
 	}
 	val, err := processValue(r)
 	if err != nil {
-		return SensorReading{}, err
+		return Reading{}, err
 	}
 
-	return SensorReading{Timestamp: tm, Value: val}, nil
+	return Reading{Timestamp: tm, Value: val}, nil
 }
 
 func processTimestamp(record []string) (time.Time, error) {
@@ -90,39 +90,19 @@ func processValue(record []string) (float64, error) {
 	return val, nil
 }
 
+// WaterLevelProvider is the interface that wraps the GetLatestWaterLevels method.
+//
+// GetLatestWaterLevels returns a slice of water level readings from sensors.
 type WaterLevelProvider interface {
-	GetLatestLevels() []StationWaterLevelReading
+	GetLatestWaterLevels() []StationWaterLevelReading
 }
 
-type WaterTemperatureProvider interface {
-	GetLatestTemperature() []StationWaterTempReading
-}
-
-type WaterDataProvider interface {
-	WaterLevelProvider
-	WaterTemperatureProvider
-}
-
-type StationWaterTempReading struct {
-	StationID   string
-	Readtime    time.Time
-	Temperature float64
-}
-
+// StationWaterLevelReading stores data obtained from
+// the water level sensor.
 type StationWaterLevelReading struct {
 	StationID  string
 	Readtime   time.Time
 	WaterLevel float64
-}
-
-type DataPuller struct {
-	DataProvider WaterLevelProvider
-}
-
-func NewDataPuller(wlp WaterLevelProvider) *DataPuller {
-	return &DataPuller{
-		DataProvider: wlp,
-	}
 }
 
 // RunServer holds all required machinery

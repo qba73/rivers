@@ -136,7 +136,7 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 
 // GetDayLevel knows how to return water level readings recorded for
 // last 24hr period for the given stationID number.
-func (c *Client) GetDayLevel(stationID string) ([]SensorReading, error) {
+func (c *Client) GetDayLevel(stationID string) ([]Reading, error) {
 	url, err := c.urlLevel(stationID, "day")
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (c *Client) GetDayLevel(stationID string) ([]SensorReading, error) {
 
 // GetWeekLevel knows how to return water level readings recorded for
 // last week period for the given stationID number.
-func (c *Client) GetWeekLevel(stationID string) ([]SensorReading, error) {
+func (c *Client) GetWeekLevel(stationID string) ([]Reading, error) {
 	url, err := c.urlLevel(stationID, "week")
 	if err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func (c *Client) GetWeekLevel(stationID string) ([]SensorReading, error) {
 
 // GetMonthLevel knows how to return water level readings recorded for
 // last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthLevel(stationID string) ([]SensorReading, error) {
+func (c *Client) GetMonthLevel(stationID string) ([]Reading, error) {
 	url, err := c.urlLevel(stationID, "month")
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (c *Client) GetMonthLevel(stationID string) ([]SensorReading, error) {
 
 // GetDayTemperature knows how to return water temperature
 // recorded for last 24hr period for the given stationID number.
-func (c *Client) GetDayTemperature(stationID string) ([]SensorReading, error) {
+func (c *Client) GetDayTemperature(stationID string) ([]Reading, error) {
 	url, err := c.urlTemperature(stationID, "day")
 	if err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func (c *Client) GetDayTemperature(stationID string) ([]SensorReading, error) {
 
 // GetWeekTemperature knows how to return water temperature
 // recorded for last week period for the given stationID number.
-func (c *Client) GetWeekTemperature(stationID string) ([]SensorReading, error) {
+func (c *Client) GetWeekTemperature(stationID string) ([]Reading, error) {
 	url, err := c.urlTemperature(stationID, "week")
 	if err != nil {
 		return nil, err
@@ -213,7 +213,7 @@ func (c *Client) GetWeekTemperature(stationID string) ([]SensorReading, error) {
 
 // GetMonthTemperature knows how to return water temperature
 // recorded for last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthTemperature(stationID string) ([]SensorReading, error) {
+func (c *Client) GetMonthTemperature(stationID string) ([]Reading, error) {
 	url, err := c.urlTemperature(stationID, "month")
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (c *Client) GetMonthTemperature(stationID string) ([]SensorReading, error) 
 }
 
 // GetDayVoltage knows how to return sensor voltage data recorded over last 24h.
-func (c *Client) GetDayVoltage(stationID string) ([]SensorReading, error) {
+func (c *Client) GetDayVoltage(stationID string) ([]Reading, error) {
 	url, err := c.urlVoltage(stationID, "day")
 	if err != nil {
 		return nil, err
@@ -297,7 +297,7 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	return nil
 }
 
-func (c *Client) sendRequestCSV(req *http.Request) ([]SensorReading, error) {
+func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 

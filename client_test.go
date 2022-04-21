@@ -50,16 +50,6 @@ func TestGetLatest(t *testing.T) {
 	}
 }
 
-func TestGetLatestWaterLevels(t *testing.T) {
-	t.Parallel()
-	ts := startServer("/geojson/latest", "testdata_latest_short.json", t)
-	defer ts.Close()
-
-	client := rivers.NewClient()
-	client.BaseURL = ts.URL
-
-}
-
 func TestGetDayLevel(t *testing.T) {
 	t.Parallel()
 	ts := startServer("/data/day", "testdata/day_01041_0001.csv", t)
@@ -68,7 +58,7 @@ func TestGetDayLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			Value:     0.294,
@@ -107,7 +97,7 @@ func TestGetWeekLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			Value:     0.294,
@@ -146,7 +136,7 @@ func TestGetMonthLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
 			Value:     0.294,
@@ -185,7 +175,7 @@ func TestGetDayTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
@@ -220,7 +210,7 @@ func TestGetWeekTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
@@ -255,7 +245,7 @@ func TestGetMonthTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.SensorReading{
+	want := []rivers.Reading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
