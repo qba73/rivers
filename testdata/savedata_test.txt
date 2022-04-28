@@ -1,0 +1,1 @@
+[{"StationID":"0000001041","Readtime":"2021-02-18T06:00:00Z","WaterLevel":1.715},{"StationID":"0000001042","Readtime":"2021-02-18T07:00:00Z","WaterLevel":2.715}]

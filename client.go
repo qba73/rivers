@@ -95,6 +95,11 @@ func NewClient() *Client {
 	}
 }
 
+// Pull ...
+func (c *Client) Pull() ([]StationWaterLevelReading, error) {
+	return c.GetLatestWaterLevels()
+}
+
 // GetLatestWaterLevels returns latest water level readings from sensors.
 func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)

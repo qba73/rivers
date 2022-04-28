@@ -12,5 +12,11 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(readings)
+	for _, r := range readings {
+		fmt.Println(r)
+	}
+
+	fmt.Println("=== Stations ===")
+
+	fmt.Println(len(readings))
 }

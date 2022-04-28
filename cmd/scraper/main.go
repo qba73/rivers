@@ -1,7 +1,9 @@
 package main
 
-import "github.com/qba73/rivers"
+import (
+	"fmt"
+)
 
 func main() {
-	rivers.RunScraper()
+	fmt.Println("Running data scraper...")
 }
