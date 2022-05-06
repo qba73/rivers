@@ -3,6 +3,7 @@ package rivers
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 )
 
@@ -11,7 +12,7 @@ type Saver interface {
 	Save(records []StationWaterLevelReading) error
 }
 
-// FileStore is a data store.
+// FileStore represents a data store.
 type FileStore struct {
 	path string
 }
@@ -28,9 +29,9 @@ func NewFileStore(path string) (*FileStore, error) {
 	return &fstore, nil
 }
 
-// Save takes a slice of records and saves them in the file.
-func (fs FileStore) Save(records []StationWaterLevelReading) error {
-	f, err := os.Create(fs.path)
+// Save takes a slice of records and saves them in a file.
+func (fs *FileStore) Save(records []StationWaterLevelReading) error {
+	f, err := os.OpenFile(fs.path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return err
 	}
@@ -38,7 +39,25 @@ func (fs FileStore) Save(records []StationWaterLevelReading) error {
 	return json.NewEncoder(f).Encode(records)
 }
 
-// Save knows how to save records using provided saver.
-func Save(records []StationWaterLevelReading, saver Saver) error {
-	return saver.Save(records)
+// Records returns records stored in a file.
+func (fs *FileStore) Records() ([]StationWaterLevelReading, error) {
+	f, err := os.Open(fs.path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var records []StationWaterLevelReading
+	decoder := json.NewDecoder(f)
+	for {
+		rec := []StationWaterLevelReading{}
+		err := decoder.Decode(&rec)
+		if errors.Is(err, io.EOF) {
+			return records, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, rec...)
+	}
 }

@@ -100,9 +100,9 @@ type WaterLevelProvider interface {
 // StationWaterLevelReading stores data obtained from
 // the water level sensor.
 type StationWaterLevelReading struct {
-	StationID  string
-	Readtime   time.Time
-	WaterLevel float64
+	StationID  string    `json:"station_id"`
+	Readtime   time.Time `json:"readtime"`
+	WaterLevel float64   `json:"water_level"`
 }
 
 // RunServer holds all required machinery
