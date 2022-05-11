@@ -7,11 +7,6 @@ import (
 	"os"
 )
 
-// Saver is an interface that wraps the Save method.
-type Saver interface {
-	Save(records []StationWaterLevelReading) error
-}
-
 // FileStore represents a data store.
 type FileStore struct {
 	path string
