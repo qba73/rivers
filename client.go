@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -55,12 +57,6 @@ type Station struct {
 	Sensors    []Sensor `json:"sensors"`
 }
 
-var validPeriod = map[string]bool{
-	"day":   true,
-	"week":  true,
-	"month": true,
-}
-
 type errResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -104,31 +100,25 @@ func (c *Client) Pull() ([]StationWaterLevelReading, error) {
 func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
 	if err != nil {
-		return []StationWaterLevelReading{}, err
+		return nil, err
 	}
-
 	var res response
 	if err := c.sendRequestJSON(req, &res); err != nil {
-		return []StationWaterLevelReading{}, err
+		return nil, err
 	}
-
 	var out []StationWaterLevelReading
-
 	for _, p := range res.Features {
 		if p.Properties.SensorRef != sensorTypeLevel {
 			continue
 		}
-
 		t, err := time.Parse(time.RFC3339, p.Properties.Datetime)
 		if err != nil {
-			return []StationWaterLevelReading{}, err
+			return nil, err
 		}
-
 		wl, err := strconv.ParseFloat(p.Properties.Value, 64)
 		if err != nil {
-			return []StationWaterLevelReading{}, err
+			return nil, err
 		}
-
 		reading := StationWaterLevelReading{
 			StationID:  p.Properties.StationRef,
 			Readtime:   t,
@@ -150,7 +140,6 @@ func (c *Client) GetDayLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -165,7 +154,6 @@ func (c *Client) GetWeekLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -180,7 +168,6 @@ func (c *Client) GetMonthLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -191,12 +178,10 @@ func (c *Client) GetDayTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -207,12 +192,10 @@ func (c *Client) GetWeekTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -223,12 +206,10 @@ func (c *Client) GetMonthTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
 
@@ -238,20 +219,20 @@ func (c *Client) GetDayVoltage(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	return c.sendRequestCSV(req)
 }
+
+var validPeriods = []string{"day", "week", "month"}
 
 // urlLevel takes stationid and time period and builds a valid url.
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *Client) urlLevel(stationID, period string) (string, error) {
-	if !validPeriod[period] {
+	if !slices.Contains(validPeriods, period) {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameLevel(stationID)), nil
@@ -261,7 +242,7 @@ func (c *Client) urlLevel(stationID, period string) (string, error) {
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *Client) urlTemperature(stationID, period string) (string, error) {
-	if !validPeriod[period] {
+	if !slices.Contains(validPeriods, period) {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameTemperature(stationID)), nil
@@ -271,7 +252,7 @@ func (c *Client) urlTemperature(stationID, period string) (string, error) {
 // If the period is not valid it errors. Period value should be
 // one of 'day', 'week' or 'month'.
 func (c *Client) urlVoltage(stationID, period string) (string, error) {
-	if !validPeriod[period] {
+	if !slices.Contains(validPeriods, period) {
 		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
 	}
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameVoltage(stationID)), nil
@@ -280,7 +261,6 @@ func (c *Client) urlVoltage(stationID, period string) (string, error) {
 func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
-
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
@@ -294,18 +274,15 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 		}
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
-
 	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
 		return err
 	}
-
 	return nil
 }
 
 func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
-
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -315,14 +292,11 @@ func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
-
 	out, err := ReadCSV(res.Body)
 	if err != nil {
 		return nil, err
 	}
-
 	return out, nil
-
 }
 
 func fileNameLevel(stationID string) string {
