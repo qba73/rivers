@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	// GaugeTimeFormat represents formatted time field in csv data files.
-	GaugeTimeFormat = "2006-01-02 15:04"
+	// gaugeTimeFormat represents formatted time field in csv data files.
+	gaugeTimeFormat = "2006-01-02 15:04"
 )
 
 // Reading represents water level recorded
@@ -75,7 +75,7 @@ func processRecord(r []string) (Reading, error) {
 }
 
 func processTimestamp(record []string) (time.Time, error) {
-	tm, err := time.Parse(GaugeTimeFormat, record[0])
+	tm, err := time.Parse(gaugeTimeFormat, record[0])
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -108,5 +108,11 @@ type StationWaterLevelReading struct {
 // RunServer holds all required machinery
 // to run the river web server.
 func RunServer() {
-	fmt.Println("Staring server...")
+	fmt.Println("Running rivers server...")
+}
+
+// RunPuller holds all required machinery
+// to run the river data puller.
+func RunPuller() {
+	fmt.Println("Running the water data puller...")
 }

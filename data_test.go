@@ -9,7 +9,7 @@ import (
 	"github.com/qba73/rivers"
 )
 
-func TestSaveWritesDataToFile(t *testing.T) {
+func TestFileStore_SavesDataToFile(t *testing.T) {
 	t.Parallel()
 	records := []rivers.StationWaterLevelReading{
 		{
@@ -50,7 +50,7 @@ func TestSaveWritesDataToFile(t *testing.T) {
 	}
 }
 
-func TestStoreAppendDataToFile(t *testing.T) {
+func TestFileStore_AppendsDataToFile(t *testing.T) {
 	t.Parallel()
 	records := []rivers.StationWaterLevelReading{
 		{

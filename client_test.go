@@ -24,7 +24,7 @@ func startServer(path string, datafile string, t *testing.T) *httptest.Server {
 	return ts
 }
 
-func TestGetLatest(t *testing.T) {
+func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 	t.Parallel()
 	ts := startServer("/geojson/latest", "testdata/latest_short.json", t)
 	defer ts.Close()
@@ -50,7 +50,7 @@ func TestGetLatest(t *testing.T) {
 	}
 }
 
-func TestGetDayLevel(t *testing.T) {
+func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 	t.Parallel()
 	ts := startServer("/data/day", "testdata/day_01041_0001.csv", t)
 	defer ts.Close()
@@ -88,7 +88,7 @@ func TestGetDayLevel(t *testing.T) {
 	}
 }
 
-func TestGetWeekLevel(t *testing.T) {
+func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/week", "testdata/week_01041_0001.csv", t)
@@ -127,7 +127,7 @@ func TestGetWeekLevel(t *testing.T) {
 	}
 }
 
-func TestGetMonthLevel(t *testing.T) {
+func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/month", "testdata/month_01041_0001.csv", t)
@@ -166,7 +166,7 @@ func TestGetMonthLevel(t *testing.T) {
 	}
 }
 
-func TestGetDayTemperature(t *testing.T) {
+func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/day", "testdata/day_01041_0002.csv", t)
@@ -201,7 +201,7 @@ func TestGetDayTemperature(t *testing.T) {
 	}
 }
 
-func TestGetWeekTemperature(t *testing.T) {
+func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/week", "testdata/week_01041_0002.csv", t)
@@ -236,7 +236,7 @@ func TestGetWeekTemperature(t *testing.T) {
 	}
 }
 
-func TestGetMonthTemperature(t *testing.T) {
+func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	t.Parallel()
 
 	ts := startServer("/data/month", "testdata/month_01041_0002.csv", t)

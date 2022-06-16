@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	fmt.Println("Running data scraper...")
+	fmt.Println("Running data puller...")
 }

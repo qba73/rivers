@@ -12,6 +12,9 @@ import (
 )
 
 const (
+	libVersion = "0.0.1"
+
+	// Sensor types
 	levelSensor   = 1
 	tempSensor    = 2
 	voltageSensor = 3
@@ -75,6 +78,7 @@ type SensorReading struct {
 
 // Client holds data required to communicate with the web service.
 type Client struct {
+	UserAgent  string
 	BaseURL    string
 	HTTPClient *http.Client
 }
@@ -84,14 +88,15 @@ type Client struct {
 // various measures recorded by sensors.
 func NewClient() *Client {
 	return &Client{
-		BaseURL: "http://waterlevel.ie",
+		UserAgent: "Rivers/" + libVersion,
+		BaseURL:   "http://waterlevel.ie",
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 	}
 }
 
-// Pull ...
+// Pull returns latest water level readings from sensors.
 func (c *Client) Pull() ([]StationWaterLevelReading, error) {
 	return c.GetLatestWaterLevels()
 }
@@ -261,6 +266,7 @@ func (c *Client) urlVoltage(stationID, period string) (string, error) {
 func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
+	req.Header.Add("User-Agent", c.UserAgent)
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
@@ -283,6 +289,7 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
+	req.Header.Set("User-Agent", c.UserAgent)
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -313,6 +320,5 @@ func fileNameVoltage(stationID string) string {
 
 // GetLatestLevels returns latests reading from all stations.
 func GetLatestLevels() ([]StationWaterLevelReading, error) {
-	c := NewClient()
-	return c.GetLatestWaterLevels()
+	return NewClient().GetLatestWaterLevels()
 }
