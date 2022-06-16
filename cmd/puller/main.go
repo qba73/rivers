@@ -1,9 +1,7 @@
 package main
 
-import (
-	"fmt"
-)
+import "github.com/qba73/rivers"
 
 func main() {
-	fmt.Println("Running data puller...")
+	rivers.RunPuller()
 }

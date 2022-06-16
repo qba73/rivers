@@ -110,9 +110,3 @@ type StationWaterLevelReading struct {
 func RunServer() {
 	fmt.Println("Running rivers server...")
 }
-
-// RunPuller holds all required machinery
-// to run the river data puller.
-func RunPuller() {
-	fmt.Println("Running the water data puller...")
-}
