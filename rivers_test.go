@@ -5,6 +5,7 @@ package rivers_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,3 +89,129 @@ func TestReadCSV(t *testing.T) {
 		t.Errorf(cmp.Diff(want, data[0]))
 	}
 }
+
+func TestParseStationGroup_ErrorsOnEmptyInput(t *testing.T) {
+	t.Parallel()
+	_, err := rivers.ReadGroupCSV(strings.NewReader(invalidGroupInputNoData))
+	if err == nil {
+		t.Fatal("want err on empty input")
+	}
+}
+
+func TestParseStationGroup_ErrorsOnHeaderOnlyCSV(t *testing.T) {
+	t.Parallel()
+	_, err := rivers.ReadGroupCSV(strings.NewReader(invalidGroupInputHeaderOnly))
+	if err == nil {
+		t.Fatal("want err on empty input")
+	}
+}
+
+func TestParseStationGroup_ErrorsOnNoStationInCSV(t *testing.T) {
+	t.Parallel()
+	_, err := rivers.ReadGroupCSV(strings.NewReader(invalidGroupInputOneColumnOnly))
+	if err == nil {
+		t.Fatal("want err on a record without station")
+	}
+}
+
+func TestParseStationGroup_ParsesSingleRecord(t *testing.T) {
+	t.Parallel()
+	want := []rivers.Reading{
+		{
+			Name:      "John's Bridge Nore",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.466,
+		},
+		{
+			Name:      "Dinin Bridge",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.053,
+		},
+		{
+			Name:      "Brownsbarn",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.413,
+		},
+		{
+			Name:      "Mount Juliet",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.451,
+		},
+	}
+
+	got, err := rivers.ReadGroupCSV(strings.NewReader(validGroupInputSingleRecord))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Fatal(cmp.Diff(want, got))
+	}
+}
+
+func TestParseStationGroup_ParsesMultipleRecords(t *testing.T) {
+	t.Parallel()
+	want := []rivers.Reading{
+		{
+			Name:      "John's Bridge Nore",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.466,
+		},
+		{
+			Name:      "Dinin Bridge",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.053,
+		},
+		{
+			Name:      "Brownsbarn",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.413,
+		},
+		{
+			Name:      "Mount Juliet",
+			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.451,
+		},
+		{
+			Name:      "John's Bridge Nore",
+			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
+			Value:     0.400,
+		},
+		{
+			Name:      "Dinin Bridge",
+			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
+			Value:     0.500,
+		},
+		{
+			Name:      "Brownsbarn",
+			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
+			Value:     0.400,
+		},
+		{
+			Name:      "Mount Juliet",
+			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
+			Value:     0.400,
+		},
+	}
+
+	got, err := rivers.ReadGroupCSV(strings.NewReader(validGroupInputMultipleRecords))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Fatal(cmp.Diff(want, got))
+	}
+}
+
+var (
+	validGroupInputSingleRecord = `Datetime,John's Bridge Nore,Dinin Bridge,Brownsbarn,Mount Juliet
+2021-06-15 22:00,0.466,0.053,0.413,0.451`
+	validGroupInputMultipleRecords = `Datetime,John's Bridge Nore,Dinin Bridge,Brownsbarn,Mount Juliet
+2021-06-15 22:00,0.466,0.053,0.413,0.451
+2021-06-15 22:15,0.400,0.500,0.400,0.400`
+	invalidGroupInputNoData        = ``
+	invalidGroupInputHeaderOnly    = `Datetime,John's Bridge Nore,Dinin Bridge,Brownsbarn,Mount Juliet`
+	invalidGroupInputOneColumnOnly = `Datetime
+2021-06-15 22:00`
+)

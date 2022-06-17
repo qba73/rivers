@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -231,6 +232,21 @@ func (c *Client) GetDayVoltage(stationID string) ([]Reading, error) {
 	return c.sendRequestCSV(req)
 }
 
+// GetStationGroupTemperature returns temperature sensor readings for
+// stations that belong to provided groupID.
+// The value of roupID should be between 1 and 28.
+func (c *Client) GetStationGroupTemperature(groupID int) ([]Reading, error) {
+	url, err := c.urlGroup(groupID)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.sendRequestCSV(req)
+}
+
 var validPeriods = []string{"day", "week", "month"}
 
 // urlLevel takes stationid and time period and builds a valid url.
@@ -263,6 +279,17 @@ func (c *Client) urlVoltage(stationID, period string) (string, error) {
 	return fmt.Sprintf("%s/data/%s/%s", c.BaseURL, period, fileNameVoltage(stationID)), nil
 }
 
+// urlGroup takes groupID and builds a valid url string.
+//
+// groupID represents group station id and its value
+// should be between 1 and 28.
+func (c *Client) urlGroup(groupID int) (string, error) {
+	if groupID < 1 || groupID > 28 {
+		return "", fmt.Errorf("invalid groupID %d, expecting value between 1 and 28", groupID)
+	}
+	return fmt.Sprintf("%s/data/group/%s", c.BaseURL, fileNameGroup(groupID)), nil
+}
+
 func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
@@ -290,6 +317,7 @@ func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
+
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -299,11 +327,29 @@ func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
+
+	if isSensorGroupDataRequest(res.Request.URL.Path) {
+		out, err := ReadGroupCSV(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	}
+
 	out, err := ReadCSV(res.Body)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+func isSensorGroupDataRequest(path string) bool {
+	s := strings.Split(path, "/")
+	end := s[len(s)-1:]
+	if len(end) != 1 {
+		return false
+	}
+	return strings.Contains(end[0], "group_")
 }
 
 func fileNameLevel(stationID string) string {
@@ -316,6 +362,10 @@ func fileNameTemperature(stationID string) string {
 
 func fileNameVoltage(stationID string) string {
 	return fmt.Sprintf("%s_000%v.csv", stationID, voltageSensor)
+}
+
+func fileNameGroup(groupID int) string {
+	return fmt.Sprintf("group_%d.csv", groupID)
 }
 
 // GetLatestLevels returns latests reading from all stations.

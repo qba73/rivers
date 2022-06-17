@@ -90,7 +90,6 @@ func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 
 func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/week", "testdata/week_01041_0001.csv", t)
 	defer ts.Close()
 
@@ -129,7 +128,6 @@ func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 
 func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/month", "testdata/month_01041_0001.csv", t)
 	defer ts.Close()
 
@@ -168,7 +166,6 @@ func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 
 func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/day", "testdata/day_01041_0002.csv", t)
 	defer ts.Close()
 
@@ -203,7 +200,6 @@ func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 
 func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/week", "testdata/week_01041_0002.csv", t)
 	defer ts.Close()
 
@@ -238,7 +234,6 @@ func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 
 func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	t.Parallel()
-
 	ts := startServer("/data/month", "testdata/month_01041_0002.csv", t)
 	defer ts.Close()
 
@@ -266,6 +261,47 @@ func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 		t.Fatalf("GetMonthTemperature(%q) got error %v", stationID, err)
 	}
 
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestRiversClient_RetrievesGroupStationReadings(t *testing.T) {
+	t.Parallel()
+	ts := startServer("/data/group", "testdata/group_1.csv", t)
+	defer ts.Close()
+
+	client := rivers.NewClient()
+	client.BaseURL = ts.URL
+
+	want := []rivers.Reading{
+		{
+			Name:      "John's Bridge Nore",
+			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.466,
+		},
+		{
+			Name:      "Dinin Bridge",
+			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.053,
+		},
+		{
+			Name:      "Brownsbarn",
+			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.413,
+		},
+		{
+			Name:      "Mount Juliet",
+			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			Value:     0.451,
+		},
+	}
+
+	groupID := 1
+	got, err := client.GetStationGroupTemperature(groupID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}

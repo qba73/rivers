@@ -18,6 +18,7 @@ const (
 // Reading represents water level recorded
 // by a gauge at the particular time.
 type Reading struct {
+	Name      string
 	Timestamp time.Time
 	Value     float64
 }
@@ -36,17 +37,17 @@ func LoadCSV(path string) ([]Reading, error) {
 // ReadCSV knows how to read a csv file containing
 // readings from a gauge in a format:
 // timestamp,level
-func ReadCSV(csvFile io.Reader) ([]Reading, error) {
+func ReadCSV(r io.Reader) ([]Reading, error) {
 	var levels []Reading
 
-	r := csv.NewReader(csvFile)
+	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
 	// before start looping through the lines (records).
-	if _, err := r.Read(); err != nil {
+	if _, err := csvreader.Read(); err != nil {
 		return nil, errors.New("error when reading csv file")
 	}
 
-	records, err := r.ReadAll()
+	records, err := csvreader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +91,48 @@ func processValue(record []string) (float64, error) {
 	return val, nil
 }
 
+func ReadGroupCSV(r io.Reader) ([]Reading, error) {
+	csvreader := csv.NewReader(r)
+	records, err := csvreader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	return parseStationGroup(records)
+}
+
+func parseStationGroup(records [][]string) ([]Reading, error) {
+	if len(records) < 2 {
+		return nil, fmt.Errorf("empty records")
+	}
+	if len(records[0]) < 2 {
+		return nil, fmt.Errorf("missing station")
+	}
+	var gsr []Reading
+	stationNames := records[0][1:]
+
+	for _, record := range records[1:] {
+		timestamp, err := time.Parse(gaugeTimeFormat, record[0])
+		if err != nil {
+			return nil, err
+		}
+		for i, reading := range record[1:] {
+			levelValue, err := strconv.ParseFloat(reading, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			gr := Reading{
+				Name:      stationNames[i],
+				Timestamp: timestamp,
+				Value:     levelValue,
+			}
+
+			gsr = append(gsr, gr)
+		}
+	}
+	return gsr, nil
+}
+
 // WaterLevelProvider is the interface that wraps the GetLatestWaterLevels method.
 //
 // GetLatestWaterLevels returns a slice of water level readings from sensors.
@@ -101,6 +144,7 @@ type WaterLevelProvider interface {
 // the water level sensor.
 type StationWaterLevelReading struct {
 	StationID  string    `json:"station_id"`
+	Name       string    `json:"name,omitempty"`
 	Readtime   time.Time `json:"readtime"`
 	WaterLevel float64   `json:"water_level"`
 }
