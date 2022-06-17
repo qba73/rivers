@@ -1,4 +1,4 @@
-// Package rivers provides functions to search and upload
+// Package rivers provides functionality to read
 // water temperature and water level data recorded by
-// sensors installed in various rivers in Ireland.
+// sensors installed in rivers in Ireland.
 package rivers

@@ -116,6 +116,9 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 			return nil, err
 		}
 		for i, reading := range record[1:] {
+			if reading == "" {
+				continue
+			}
 			levelValue, err := strconv.ParseFloat(reading, 64)
 			if err != nil {
 				return nil, err
