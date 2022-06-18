@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,8 +20,14 @@ const (
 // by a gauge at the particular time.
 type Reading struct {
 	Name      string
+	RefID     string
 	Timestamp time.Time
 	Value     float64
+}
+
+// String prints out information about the reading.
+func (rd Reading) String() string {
+	return fmt.Sprintf("Name: %s, Time: %s, Value: %v", rd.Name, rd.Timestamp, rd.Value)
 }
 
 // LoadCSV knows how to open and read given csv file.
@@ -116,6 +123,8 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 			return nil, err
 		}
 		for i, reading := range record[1:] {
+			// If reading from sensor is not yet present
+			// we skip it and attempt to process next item.
 			if reading == "" {
 				continue
 			}
@@ -123,13 +132,12 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			gr := Reading{
-				Name:      stationNames[i],
+				// Some headers in csv files come with empty spaces. So, make sure we trim them.
+				Name:      strings.TrimSpace(stationNames[i]),
 				Timestamp: timestamp,
 				Value:     levelValue,
 			}
-
 			gsr = append(gsr, gr)
 		}
 	}
@@ -143,17 +151,12 @@ type WaterLevelProvider interface {
 	GetLatestWaterLevels() []StationWaterLevelReading
 }
 
-// StationWaterLevelReading stores data obtained from
-// the water level sensor.
+// StationWaterLevelReading represents data received
+// from a water level sensor.
 type StationWaterLevelReading struct {
 	StationID  string    `json:"station_id"`
 	Name       string    `json:"name,omitempty"`
+	RegionID   int       `json:"region_id,omitempty"`
 	Readtime   time.Time `json:"readtime"`
 	WaterLevel float64   `json:"water_level"`
-}
-
-// RunServer holds all required machinery
-// to run the river web server.
-func RunServer() {
-	fmt.Println("Running rivers server...")
 }

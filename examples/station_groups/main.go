@@ -12,12 +12,12 @@ func main() {
 
 	// groupID indicates which group station readings to retrieve.
 	// groupID value is between 1 and 28.
-	stations, err := client.GetStationGroupTemperature(1)
+	stations, err := client.GetGroupWaterLevel(1)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	for _, station := range stations {
-		fmt.Printf("%v\n", station)
+		fmt.Println(station)
 	}
 }

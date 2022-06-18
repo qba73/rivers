@@ -8,9 +8,9 @@ import (
 )
 
 type Puller struct {
-	Client *Client
-	Store  Saver
-	Time   time.Time
+	Client   *Client
+	Store    Saver
+	Interval time.Duration
 }
 
 func NewPuller() (*Puller, error) {
@@ -20,8 +20,9 @@ func NewPuller() (*Puller, error) {
 		return nil, fmt.Errorf("%w: creating data puller", err)
 	}
 	p := Puller{
-		Client: riverClient,
-		Store:  store,
+		Client:   riverClient,
+		Store:    store,
+		Interval: 5 * time.Minute,
 	}
 	return &p, nil
 }
@@ -50,12 +51,12 @@ func RunPuller() {
 	}
 
 	log.Println("rivers: Start pulling sensor data")
-	for {
+
+	for range time.NewTicker(p.Interval).C {
 		log.Println("rivers: Pulling data")
 		if err := p.Run(); err != nil {
 			break
 		}
 		log.Printf("rivers: Data saved. Resuming in %s", duration)
-		time.Sleep(time.Duration(duration))
 	}
 }

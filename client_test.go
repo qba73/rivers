@@ -40,6 +40,8 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 	want := []rivers.StationWaterLevelReading{
 		{
 			StationID:  "0000001041",
+			Name:       "Sandy Mills",
+			RegionID:   3,
 			Readtime:   time.Date(2021, 02, 18, 06, 00, 00, 00, time.UTC),
 			WaterLevel: 1.715,
 		},
@@ -266,7 +268,7 @@ func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	}
 }
 
-func TestRiversClient_RetrievesGroupStationReadings(t *testing.T) {
+func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 	t.Parallel()
 	ts := startServer("/data/group", "testdata/group_1.csv", t)
 	defer ts.Close()
@@ -298,7 +300,7 @@ func TestRiversClient_RetrievesGroupStationReadings(t *testing.T) {
 	}
 
 	groupID := 1
-	got, err := client.GetStationGroupTemperature(groupID)
+	got, err := client.GetGroupWaterLevel(groupID)
 	if err != nil {
 		t.Fatal(err)
 	}

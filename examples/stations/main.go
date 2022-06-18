@@ -2,21 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/qba73/rivers"
 )
 
 func main() {
-	readings, err := rivers.GetLatestLevels()
+	readings, err := rivers.GetLatestWaterLevels()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-
 	for _, r := range readings {
-		fmt.Println(r)
+		fmt.Printf("Station: %s, ID: %s, RegionID: %d, Time: %s, Water level: %.2f\n", r.Name, r.StationID, r.RegionID, r.Readtime, r.WaterLevel)
 	}
-
-	fmt.Println("=== Stations ===")
-
-	fmt.Println(len(readings))
 }
