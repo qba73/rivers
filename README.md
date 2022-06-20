@@ -5,7 +5,7 @@
 
 ## rivers
 
-```rivers``` is a Go library for reading water level and temperature data from stations located in rivers in Ireland. It allows to get data from more than 450 sensors located in 28 rivers.  
+```rivers``` is a Go library and a cli utility for reading water level and temperature data from stations located in rivers in Ireland. It allows to get data from more than 450 sensors located in 28 rivers.  
 
 ## Using the Go library
 Import the library using:
@@ -36,3 +36,21 @@ Not all the functionality of the [water level](https://waterlevel.ie) is impleme
 
 Pull requests welcome!
 
+## Using the CLI utility for reading water levels
+
+Get readings from stations:
+```
+$ waterlevel
+time: 2022-06-20 05:30:00 +0000 UTC, station: Sandy Mills, id: 0000001041, regionid: 3, level: 0.25
+time: 2022-06-20 05:15:00 +0000 UTC, station: Ballybofey, id: 0000001043, regionid: 3, level: 0.58
+time: 2022-06-20 05:30:00 +0000 UTC, station: Glaslough, id: 0000003055, regionid: 10, level: 0.43
+time: 2022-06-20 05:30:00 +0000 UTC, station: Cappog Bridge, id: 0000003058, regionid: 10, level: 0.45
+time: 2022-06-20 05:30:00 +0000 UTC, station: Moyles Mill, id: 0000006011, regionid: 10, level: 0.39
+[...]
+time: 2022-06-20 05:30:00 +0000 UTC, station: Malin Head, id: 0000040060, regionid: 3, level: 1.81
+```
+
+Save readings to a file:
+```
+$ waterlevel > levels.txt
+```

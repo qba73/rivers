@@ -123,8 +123,8 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 			return nil, err
 		}
 		for i, reading := range record[1:] {
-			// If reading from sensor is not yet present
-			// we skip it and attempt to process next item.
+			// If reading value from sensor is not yet present we
+			// do not attemp to process it.
 			if reading == "" {
 				continue
 			}
@@ -133,7 +133,7 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 				return nil, err
 			}
 			gr := Reading{
-				// Some headers in csv files come with empty spaces. So, make sure we trim them.
+				// Some headers in csv files come with empty spaces. We trim them.
 				Name:      strings.TrimSpace(stationNames[i]),
 				Timestamp: timestamp,
 				Value:     levelValue,

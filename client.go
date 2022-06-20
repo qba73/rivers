@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -330,4 +331,17 @@ func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]Reading, error
 // This func uses default rivers' client under the hood.
 func GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	return NewClient().GetLatestWaterLevels()
+}
+
+// RunCLI executes program and prints out latest recorded water levels.
+func RunCLI() {
+	readings, err := GetLatestWaterLevels()
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
+	}
+	for _, reading := range readings {
+		fmt.Fprintf(os.Stdout, "time: %s, station: %s, id: %s, regionid: %d, level: %.2f\n",
+			reading.Readtime, reading.Name, reading.StationID, reading.RegionID, reading.WaterLevel)
+	}
 }
