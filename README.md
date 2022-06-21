@@ -54,3 +54,9 @@ Save readings to a file:
 ```
 $ waterlevel > levels.txt
 ```
+
+### Disclaimer
+
+```rivers``` project processes *Irish Public Sector Information* licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0), [licence](http://waterlevel.ie) provided by the Office of Public Works.
+Data is licensed under the [Creative Commons By Attribution (CC-BY) version 4.0 license](https://creativecommons.org/licenses/by/4.0/legalcode) - see [summary](https://creativecommons.org/licenses/by/4.0/).
+This is in line with Irish Government [PER Circular 12 of 2016](http://circulars.gov.ie/pdf/circular/per/2016/12.pdf) and policy on Open Data [data.gov.ie](https://data.gov.ie/data).
