@@ -276,26 +276,26 @@ func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.StationWaterLevelReading{
 		{
-			Name:      "John's Bridge Nore",
-			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.466,
+			Name:       "John's Bridge Nore",
+			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			WaterLevel: 0.466,
 		},
 		{
-			Name:      "Dinin Bridge",
-			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.053,
+			Name:       "Dinin Bridge",
+			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			WaterLevel: 0.053,
 		},
 		{
-			Name:      "Brownsbarn",
-			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.413,
+			Name:       "Brownsbarn",
+			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			WaterLevel: 0.413,
 		},
 		{
-			Name:      "Mount Juliet",
-			Timestamp: time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.451,
+			Name:       "Mount Juliet",
+			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
+			WaterLevel: 0.451,
 		},
 	}
 

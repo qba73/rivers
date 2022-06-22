@@ -133,7 +133,7 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 				return nil, err
 			}
 			gr := Reading{
-				// Some headers in csv files come with empty spaces. We trim them.
+				// Some headers in csv files come with empty spaces, so trim them.
 				Name:      strings.TrimSpace(stationNames[i]),
 				Timestamp: timestamp,
 				Value:     levelValue,
@@ -154,9 +154,18 @@ type WaterLevelProvider interface {
 // StationWaterLevelReading represents data received
 // from a water level sensor.
 type StationWaterLevelReading struct {
-	StationID  string    `json:"station_id"`
+	StationID  string    `json:"station_id,omitempty"`
 	Name       string    `json:"name,omitempty"`
 	RegionID   int       `json:"region_id,omitempty"`
 	Readtime   time.Time `json:"readtime"`
 	WaterLevel float64   `json:"water_level"`
+}
+
+type StationGroupReading struct {
+	GroupID      int       `json:"group_id"`
+	GroupName    string    `json:"group_name"`
+	StationID    string    `json:"station_id"`
+	Name         string    `json:"name,omitempty"`
+	Readtime     time.Time `json:"readtime"`
+	ReadingValue float64   `json:"reading_value"`
 }

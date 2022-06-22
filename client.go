@@ -3,6 +3,7 @@ package rivers
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -107,7 +108,7 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	if err := c.sendRequestJSON(req, &res); err != nil {
 		return nil, err
 	}
-	var out []StationWaterLevelReading
+	var readings []StationWaterLevelReading
 	for _, p := range res.Features {
 		if p.Properties.SensorRef != sensorTypeLevel {
 			continue
@@ -127,9 +128,9 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 			Readtime:   t,
 			WaterLevel: wl,
 		}
-		out = append(out, reading)
+		readings = append(readings, reading)
 	}
-	return out, nil
+	return readings, nil
 }
 
 // GetDayLevel knows how to return water level readings recorded for
@@ -232,7 +233,7 @@ func (c *Client) GetDayVoltage(stationID string) ([]Reading, error) {
 // GetGroupWaterLevel returns water level readings for
 // stations that belong to provided groupID.
 // The value of roupID should be between 1 and 28.
-func (c *Client) GetGroupWaterLevel(groupID int) ([]Reading, error) {
+func (c *Client) GetGroupWaterLevel(groupID int) ([]StationWaterLevelReading, error) {
 	if groupID < 1 || groupID > 28 {
 		return nil, fmt.Errorf("invalid groupID %d, expecting value between 1 and 28", groupID)
 	}
@@ -241,7 +242,22 @@ func (c *Client) GetGroupWaterLevel(groupID int) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendStationGroupRequestCSV(req)
+
+	groupReadings, err := c.sendStationGroupRequestCSV(req)
+	if err != nil {
+		return nil, err
+	}
+	var readings []StationWaterLevelReading
+
+	for _, reading := range groupReadings {
+		station := StationWaterLevelReading{
+			Name:       reading.Name,
+			Readtime:   reading.Timestamp,
+			WaterLevel: reading.Value,
+		}
+		readings = append(readings, station)
+	}
+	return readings, nil
 }
 
 var validPeriods = []string{"day", "week", "month"}
@@ -333,8 +349,32 @@ func GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	return NewClient().GetLatestWaterLevels()
 }
 
+func GetLatestWaterLevelsForGroup(id int) ([]StationWaterLevelReading, error) {
+	return NewClient().GetGroupWaterLevel(id)
+}
+
 // RunCLI executes program and prints out latest recorded water levels.
 func RunCLI() {
+	fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	group := fset.Int("group", 0, "water level for the group identified by provided ID (1..28)")
+	err := fset.Parse(os.Args[1:])
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	if *group != 0 {
+		readings, err := GetLatestWaterLevelsForGroup(*group)
+		if err != nil {
+			fmt.Fprint(os.Stderr, err)
+			os.Exit(1)
+		}
+		for _, reading := range readings {
+			fmt.Printf("%+v\n", reading)
+		}
+		os.Exit(0)
+	}
+
 	readings, err := GetLatestWaterLevels()
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
@@ -344,4 +384,5 @@ func RunCLI() {
 		fmt.Fprintf(os.Stdout, "time: %s, station: %s, id: %s, regionid: %d, level: %.2f\n",
 			reading.Readtime, reading.Name, reading.StationID, reading.RegionID, reading.WaterLevel)
 	}
+	os.Exit(0)
 }
