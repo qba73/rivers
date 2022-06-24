@@ -41,13 +41,18 @@ Pull requests welcome!
 Get readings from stations:
 ```
 $ waterlevel
-time: 2022-06-20 05:30:00 +0000 UTC, station: Sandy Mills, id: 0000001041, regionid: 3, level: 0.25
-time: 2022-06-20 05:15:00 +0000 UTC, station: Ballybofey, id: 0000001043, regionid: 3, level: 0.58
-time: 2022-06-20 05:30:00 +0000 UTC, station: Glaslough, id: 0000003055, regionid: 10, level: 0.43
-time: 2022-06-20 05:30:00 +0000 UTC, station: Cappog Bridge, id: 0000003058, regionid: 10, level: 0.45
-time: 2022-06-20 05:30:00 +0000 UTC, station: Moyles Mill, id: 0000006011, regionid: 10, level: 0.39
+time: 2022-06-24 05:45:00 +0000 UTC, station: Sandy Mills, id: 1041, level: 0.21
+time: 2022-06-24 05:15:00 +0000 UTC, station: Ballybofey, id: 1043, level: 0.46
+time: 2022-06-24 05:45:00 +0000 UTC, station: Glaslough, id: 3055, level: 0.43
+time: 2022-06-24 05:45:00 +0000 UTC, station: Cappog Bridge, id: 3058, level: 0.20
+time: 2022-06-24 05:45:00 +0000 UTC, station: Moyles Mill, id: 6011, level: 0.39
+time: 2022-06-24 05:45:00 +0000 UTC, station: Clarebane, id: 6012, level: 0.24
+time: 2022-06-24 05:45:00 +0000 UTC, station: Charleville Weir, id: 6013, level: 0.28
+time: 2022-06-24 05:45:00 +0000 UTC, station: Tallanstown Weir, id: 6014, level: 0.29
+time: 2022-06-24 05:45:00 +0000 UTC, station: Mansfieldstown, id: 6021, level: -0.07
 [...]
-time: 2022-06-20 05:30:00 +0000 UTC, station: Malin Head, id: 0000040060, regionid: 3, level: 1.81
+time: 2022-06-24 05:45:00 +0000 UTC, station: Ballyloskey, id: 40008, level: 0.51
+time: 2022-06-24 05:45:00 +0000 UTC, station: Malin Head, id: 40060, level: 3.50
 ```
 
 Save readings to a file:

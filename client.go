@@ -3,11 +3,12 @@ package rivers
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -349,40 +350,20 @@ func GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 	return NewClient().GetLatestWaterLevels()
 }
 
-func GetLatestWaterLevelsForGroup(id int) ([]StationWaterLevelReading, error) {
-	return NewClient().GetGroupWaterLevel(id)
-}
-
 // RunCLI executes program and prints out latest recorded water levels.
 func RunCLI() {
-	fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	group := fset.Int("group", 0, "water level for the group identified by provided ID (1..28)")
-	err := fset.Parse(os.Args[1:])
-	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
-	}
-
-	if *group != 0 {
-		readings, err := GetLatestWaterLevelsForGroup(*group)
-		if err != nil {
-			fmt.Fprint(os.Stderr, err)
-			os.Exit(1)
-		}
-		for _, reading := range readings {
-			fmt.Printf("%+v\n", reading)
-		}
-		os.Exit(0)
-	}
-
 	readings, err := GetLatestWaterLevels()
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
-	for _, reading := range readings {
-		fmt.Fprintf(os.Stdout, "time: %s, station: %s, id: %s, regionid: %d, level: %.2f\n",
-			reading.Readtime, reading.Name, reading.StationID, reading.RegionID, reading.WaterLevel)
-	}
+	printReadings(os.Stdout, readings)
 	os.Exit(0)
+}
+
+func printReadings(w io.Writer, readings []StationWaterLevelReading) {
+	for _, reading := range readings {
+		fmt.Fprintf(w, "time: %s, station: %s, id: %s, level: %.2f\n",
+			reading.Readtime, reading.Name, strings.TrimLeft(reading.StationID, "0"), reading.WaterLevel)
+	}
 }
