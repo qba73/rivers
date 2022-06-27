@@ -1,0 +1,33 @@
+CREATE TABLE station_groups (
+    group_id INTEGER PRIMARY KEY,
+    group_name VARCHAR NOT NULL,
+);
+
+INSERT INTO station_groups (group_id, group_name) VALUES
+(1, "Nore"),
+(2, "Shannon"),
+(3, "Turlough"),
+(4, "Barrow"),
+(5, "Munster Blackwater"),
+(6, "Suir back-up"),
+(8, "Erne"),
+(9, "Corrib"),
+(10, "Moy"),
+(11, "Fergus"),
+(12, "Maigue"),
+(13, "Slaney"),
+(14, "Shannon L.Ree"),
+(15, "Suck"),
+(16, "Tidal"),
+(17, "Boyne"),
+(18, "Munster Blackwater (Mallow)"),
+(19, "Munster Blackwater (Fermoy)"),
+(20, "Inny"),
+(21, "Brosna"),
+(22, "Foyle"),
+(23, "Bandon"),
+(24, "Laune"),
+(25, "Ballysadare"),
+(26, "Suir"),
+(27, "Waterford City"),
+(28, "South Galway");
