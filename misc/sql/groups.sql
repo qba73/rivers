@@ -1,9 +1,9 @@
-CREATE TABLE station_groups (
-    group_id INTEGER PRIMARY KEY,
-    group_name VARCHAR NOT NULL,
+CREATE TABLE IF NOT EXISTS station_groups (
+    id INTEGER PRIMARY KEY NOT NULL,
+    name CHAR(30) NOT NULL
 );
 
-INSERT INTO station_groups (group_id, group_name) VALUES
+INSERT INTO station_groups (id, name) VALUES
 (1, "Nore"),
 (2, "Shannon"),
 (3, "Turlough"),

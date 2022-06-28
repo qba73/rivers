@@ -1,16 +1,16 @@
-DROP TABLE stations;
+DROP TABLE IF EXISTS stations;
 
 CREATE TABLE stations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name CHAR(50) NOT NULL
+    name CHAR(50) NOT NULL,
     ref_id INT NOT NULL,
-    long NUMERIC,
-    lat NUMERIC,
-)
+    long REAL,
+    lat REAL,
+    group_id INT);
 
-INSERT INTO STATIONS (name, ref_id, long, lat) VALUES
+
+INSERT INTO stations (name, ref_id, long, lat) VALUES
 ("Sandy Mills", 1041, -7.575758, 54.838318),
-("Dreenan", 1042),
 ("Ballybofey", 1043, -7.790749, 54.799769),
 ("Glaslough", 3055, -6.894344, 54.323281),
 ("Cappog Bridge", 3058, -7.021297, 54.266809),

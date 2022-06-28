@@ -1,12 +1,10 @@
-DELETE TABLE sensors;
-
-CREATE TABLE sensors (
+CREATE TABLE IF NOT EXISTS sensors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sensor_type CHAR(20) NOT NULL,
-    sensor_name CHAR(20) NOT NULL,
+    type CHAR(20) NOT NULL,
+    name CHAR(20) NOT NULL
 );
 
-INSERT INTO sensors (TYPE, NAME) VALUES
+INSERT INTO sensors (type, name) VALUES
 ("0001", "Water level"),
 ("0002", "Temperature"),
 ("0004", "Battery voltage"),

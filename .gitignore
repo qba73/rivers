@@ -29,4 +29,6 @@ docker/
 
 # SQL files
 *.sql
+*.db
+
 
