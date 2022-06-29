@@ -1,11 +1,24 @@
 package rivers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"time"
 )
+
+type option func(*Puller) error
+
+func WithSaver(st Saver) option {
+	return func(p *Puller) error {
+		if st == nil {
+			return errors.New("nil data saver")
+		}
+		p.Store = st
+		return nil
+	}
+}
 
 type Puller struct {
 	Client   *Client
@@ -13,7 +26,7 @@ type Puller struct {
 	Interval time.Duration
 }
 
-func NewPuller() (*Puller, error) {
+func NewPuller(opts ...option) (*Puller, error) {
 	riverClient := NewClient()
 	store, err := NewFileStore("data.txt")
 	if err != nil {
@@ -24,6 +37,13 @@ func NewPuller() (*Puller, error) {
 		Store:    store,
 		Interval: 5 * time.Minute,
 	}
+
+	for _, opt := range opts {
+		if err := opt(&p); err != nil {
+			return nil, fmt.Errorf("creating data puller: %w", err)
+		}
+	}
+
 	return &p, nil
 }
 

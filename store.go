@@ -3,8 +3,12 @@ package rivers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Saver is the interface that wraps the basic Save method.
@@ -62,4 +66,35 @@ func (fs *FileStore) Records() ([]StationWaterLevelReading, error) {
 		}
 		records = append(records, rec...)
 	}
+}
+
+// Open returns database connection.
+func Open(path string) (*sqlx.DB, error) {
+	return sqlx.Open("sqlite3", path)
+}
+
+// WaterLevel represents water level value
+// recorded at the given time by the sensor installed
+// in the station.
+type WaterLevel struct {
+	ID          int     `db:"id"`
+	StationID   int     `db:"station_id"`
+	StationName string  `db:"station_name"`
+	SensorRef   string  `db:"sensor_ref"`
+	Datetime    string  `db:"datetime"`
+	Value       float64 `db:"value"`
+}
+
+type Readings struct {
+	DB *sqlx.DB
+}
+
+// List returns all water level readings.
+func (r *Readings) List() ([]WaterLevel, error) {
+	var readings []WaterLevel
+	const query = `SELECT * FROM waterlevel_readings`
+	if err := r.DB.Select(&readings, query); err != nil {
+		return nil, fmt.Errorf("selecting water level readings: %w", err)
+	}
+	return readings, nil
 }

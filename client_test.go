@@ -41,7 +41,6 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 		{
 			StationID:  "0000001041",
 			Name:       "Sandy Mills",
-			RegionID:   3,
 			Readtime:   time.Date(2021, 02, 18, 06, 00, 00, 00, time.UTC),
 			WaterLevel: 1.715,
 		},

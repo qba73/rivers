@@ -125,7 +125,6 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 		reading := StationWaterLevelReading{
 			StationID:  p.Properties.StationRef,
 			Name:       p.Properties.StationName,
-			RegionID:   p.Properties.RegionID,
 			Readtime:   t,
 			WaterLevel: wl,
 		}

@@ -156,7 +156,6 @@ type WaterLevelProvider interface {
 type StationWaterLevelReading struct {
 	StationID  string    `json:"station_id,omitempty"`
 	Name       string    `json:"name,omitempty"`
-	RegionID   int       `json:"region_id,omitempty"`
 	Readtime   time.Time `json:"readtime"`
 	WaterLevel float64   `json:"water_level"`
 }
