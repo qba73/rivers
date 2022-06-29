@@ -20,6 +20,7 @@
 # IDE/Editors
 .vscode/
 *.swp
+.devcontainer/
 
 # DynamoDB local
 docker/
