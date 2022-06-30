@@ -77,7 +77,6 @@ func Open(path string) (*sqlx.DB, error) {
 // recorded at the given time by the sensor installed
 // in the station.
 type WaterLevel struct {
-	ID          int     `db:"id"`
 	StationID   int     `db:"station_id"`
 	StationName string  `db:"station_name"`
 	SensorRef   string  `db:"sensor_ref"`
@@ -90,11 +89,24 @@ type Readings struct {
 }
 
 // List returns all water level readings.
-func (r *Readings) List() ([]WaterLevel, error) {
+func (r Readings) List() ([]WaterLevel, error) {
 	var readings []WaterLevel
-	const query = `SELECT * FROM waterlevel_readings`
+	const query = `SELECT station_id, station_name, sensor_ref, datetime, value FROM waterlevel_readings`
 	if err := r.DB.Select(&readings, query); err != nil {
 		return nil, fmt.Errorf("selecting water level readings: %w", err)
 	}
 	return readings, nil
+}
+
+// GetLast retrieves latest water level reading for given station id.
+func (r Readings) GetLast(stationID int) (WaterLevel, error) {
+	var reading []WaterLevel
+	const q = `SELECT station_id, station_name, sensor_ref, datetime, value FROM waterlevel_readings WHERE station_id=? order by datetime desc limit 1`
+	if err := r.DB.Select(&reading, q, stationID); err != nil {
+		return WaterLevel{}, fmt.Errorf("selecting last water level reading for stationID %d: %w", stationID, err)
+	}
+	if len(reading) == 0 {
+		return WaterLevel{}, fmt.Errorf("no results for stationID %d", stationID)
+	}
+	return reading[0], nil
 }

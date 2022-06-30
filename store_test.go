@@ -171,7 +171,6 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 	}
 	want := []rivers.WaterLevel{
 		{
-			ID:          1,
 			StationID:   1042,
 			StationName: "Sandy Millss",
 			SensorRef:   "0001",
@@ -179,7 +178,6 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 			Value:       0.384,
 		},
 		{
-			ID:          2,
 			StationID:   1043,
 			StationName: "Ballybofey",
 			SensorRef:   "0001",
@@ -187,7 +185,6 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 			Value:       1.679,
 		},
 		{
-			ID:          3,
 			StationID:   3055,
 			StationName: "Glaslough",
 			Datetime:    "2022-06-28T04:45:00Z",
@@ -197,5 +194,30 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 	}
 	if !cmp.Equal(want, got) {
 		t.Errorf(cmp.Diff(want, got))
+	}
+}
+
+func TestRetrieveLastReadingForOneStation(t *testing.T) {
+	t.Parallel()
+	db, err := rivers.Open("testdata/water.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	readings := rivers.Readings{DB: db}
+	stationID := 1043
+	got, err := readings.GetLast(stationID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := rivers.WaterLevel{
+		StationID:   1043,
+		StationName: "Ballybofey",
+		SensorRef:   "0001",
+		Datetime:    "2022-06-28T04:14:00Z",
+		Value:       1.679,
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
 }

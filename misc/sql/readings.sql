@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS temperature_readings (
+CREATE TABLE IF NOT EXISTS waterlevel_readings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     station_id INT NOT NULL,
     station_name CHAR(50) NOT NULL,
@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS temperature_readings (
     value REAL
 );
 
-INSERT INTO temperature_readings (station_id, station_name, sensor_ref, datetime, value) VALUES
-(1042, "Sandy Millss", "0001", "2022-06-28T04:45:00Z", 0.384),
-(1043, "Ballybofey", "0001", "2022-06-28T04:14:00Z", 1.679),
-(3055, "Glaslough", "0001", "2022-06-28T04:45:00Z", 0.478);
+INSERT INTO waterlevel_readings (station_id, station_name, sensor_ref, datetime, value) VALUES
+(1042, "Sandy Millss", "0001", "2022-06-29T04:45:00Z", 0.384),
+(1043, "Ballybofey", "0001", "2022-06-29T04:14:00Z", 1.679),
+(1043, "Ballybofey", "0001", "2022-06-29T05:15:00Z", 1.779),
+(1043, "Ballybofey", "0001", "2022-06-29T06:30:00Z", 2.000),
+(3055, "Glaslough", "0001", "2022-06-29T04:45:00Z", 0.478);
