@@ -10,7 +10,7 @@ import (
 
 type option func(*Puller) error
 
-func WithSaver(st Saver) option {
+func WithSaver(st Store) option {
 	return func(p *Puller) error {
 		if st == nil {
 			return errors.New("nil data saver")
@@ -22,13 +22,13 @@ func WithSaver(st Saver) option {
 
 type Puller struct {
 	Client   *Client
-	Store    Saver
+	Store    Store
 	Interval time.Duration
 }
 
 func NewPuller(opts ...option) (*Puller, error) {
 	riverClient := NewClient()
-	store, err := NewFileStore("data.txt")
+	store, err := NewSQLiteStore("data.db")
 	if err != nil {
 		return nil, fmt.Errorf("%w: creating data puller", err)
 	}
@@ -53,7 +53,13 @@ func (p *Puller) Run() error {
 	if err != nil {
 		return err
 	}
-	return p.Store.Save(stationReadings)
+	for _, reading := range stationReadings {
+		err = p.Store.Save(reading)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // RunPuller holds all required machinery
