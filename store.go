@@ -106,11 +106,12 @@ func (r *Readings) GetLast(stationID int) (WaterLevel, error) {
 		return WaterLevel{}, fmt.Errorf("selecting last water level reading for stationID %d: %w", stationID, err)
 	}
 	if len(reading) == 0 {
-		return WaterLevel{}, fmt.Errorf("no results for stationID %d", stationID)
+		return WaterLevel{}, fmt.Errorf("no results for stationID %d: %w", stationID, ErrNoReading)
 	}
 	return reading[0], nil
 }
 
+// Add takes a reading and adds it to the store.
 func (r *Readings) Add(level WaterLevel) error {
 	levelreadings := `INSERT INTO waterlevel_readings (station_id, station_name, sensor_ref, datetime, value) VALUES (?, ?, ?, ?, ?)`
 	_, err := r.DB.Exec(levelreadings, level.StationID, level.StationName, level.SensorRef, level.Datetime, level.Value)
@@ -119,3 +120,25 @@ func (r *Readings) Add(level WaterLevel) error {
 	}
 	return nil
 }
+
+// AddLatest takes water lever readings and add it to the store
+// if the reading does not already exist. It returns an error
+// if the reading already is present in the store.
+func (r *Readings) AddLatest(level WaterLevel) error {
+	current, err := r.GetLast(level.StationID)
+	if err != nil && !errors.Is(err, ErrNoReading) {
+		return err
+	}
+	if errors.Is(err, ErrNoReading) {
+		return r.Add(level)
+	}
+	if current.StationID == level.StationID && current.Datetime == level.Datetime {
+		return fmt.Errorf("adding sensor reading %v: %w", level, ErrReadingExists)
+	}
+	return r.Add(level)
+}
+
+var (
+	ErrReadingExists = errors.New("duplicated sensor entry")
+	ErrNoReading     = errors.New("reading entry doesn't exist")
+)
