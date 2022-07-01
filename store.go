@@ -89,7 +89,7 @@ type Readings struct {
 }
 
 // List returns all water level readings.
-func (r Readings) List() ([]WaterLevel, error) {
+func (r *Readings) List() ([]WaterLevel, error) {
 	var readings []WaterLevel
 	const query = `SELECT station_id, station_name, sensor_ref, datetime, value FROM waterlevel_readings`
 	if err := r.DB.Select(&readings, query); err != nil {
@@ -99,14 +99,23 @@ func (r Readings) List() ([]WaterLevel, error) {
 }
 
 // GetLast retrieves latest water level reading for given station id.
-func (r Readings) GetLast(stationID int) (WaterLevel, error) {
+func (r *Readings) GetLast(stationID int) (WaterLevel, error) {
 	var reading []WaterLevel
-	const q = `SELECT station_id, station_name, sensor_ref, datetime, value FROM waterlevel_readings WHERE station_id=? order by datetime desc limit 1`
-	if err := r.DB.Select(&reading, q, stationID); err != nil {
+	levelreading := `SELECT station_id, station_name, sensor_ref, datetime, value FROM waterlevel_readings WHERE station_id=? order by datetime desc limit 1`
+	if err := r.DB.Select(&reading, levelreading, stationID); err != nil {
 		return WaterLevel{}, fmt.Errorf("selecting last water level reading for stationID %d: %w", stationID, err)
 	}
 	if len(reading) == 0 {
 		return WaterLevel{}, fmt.Errorf("no results for stationID %d", stationID)
 	}
 	return reading[0], nil
+}
+
+func (r *Readings) Add(level WaterLevel) error {
+	levelreadings := `INSERT INTO waterlevel_readings (station_id, station_name, sensor_ref, datetime, value) VALUES (?, ?, ?, ?, ?)`
+	_, err := r.DB.Exec(levelreadings, level.StationID, level.StationName, level.SensorRef, level.Datetime, level.Value)
+	if err != nil {
+		return fmt.Errorf("adding waterlevel reading %v: %w", level, err)
+	}
+	return nil
 }

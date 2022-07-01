@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/jmoiron/sqlx"
 	"github.com/qba73/rivers"
 )
 
@@ -160,10 +161,10 @@ func TestLoadData_ReadsAllRecordsFromFile(t *testing.T) {
 
 func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 	t.Parallel()
-	db, err := rivers.Open("testdata/water.db")
-	if err != nil {
-		t.Fatal(err)
-	}
+	db := createTestDB(waterLevelSchema, t)
+	prepareTestData(stmtRetrieveLastReadingForOneStation, db, t)
+	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
 	levels := rivers.Readings{DB: db}
 	got, err := levels.List()
 	if err != nil {
@@ -175,21 +176,35 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 			StationName: "Sandy Millss",
 			SensorRef:   "0001",
 			Datetime:    "2022-06-28T04:45:00Z",
-			Value:       0.384,
+			Value:       0.383,
 		},
 		{
 			StationID:   1043,
 			StationName: "Ballybofey",
 			SensorRef:   "0001",
-			Datetime:    "2022-06-28T04:14:00Z",
+			Datetime:    "2022-06-28T04:15:00Z",
 			Value:       1.679,
+		},
+		{
+			StationID:   1043,
+			StationName: "Ballybofey",
+			SensorRef:   "0001",
+			Datetime:    "2022-06-29T05:15:00Z",
+			Value:       1.779,
+		},
+		{
+			StationID:   1043,
+			StationName: "Ballybofey",
+			SensorRef:   "0001",
+			Datetime:    "2022-06-30T04:15:00Z",
+			Value:       1.879,
 		},
 		{
 			StationID:   3055,
 			StationName: "Glaslough",
-			Datetime:    "2022-06-28T04:45:00Z",
 			SensorRef:   "0001",
-			Value:       0.4779999999999999,
+			Datetime:    "2022-06-28T04:45:00Z",
+			Value:       0.478,
 		},
 	}
 	if !cmp.Equal(want, got) {
@@ -199,10 +214,10 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 
 func TestRetrieveLastReadingForOneStation(t *testing.T) {
 	t.Parallel()
-	db, err := rivers.Open("testdata/water.db")
-	if err != nil {
-		t.Fatal(err)
-	}
+	db := createTestDB(waterLevelSchema, t)
+	prepareTestData(stmtRetrieveLastReadingForOneStation, db, t)
+	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
 	readings := rivers.Readings{DB: db}
 	stationID := 1043
 	got, err := readings.GetLast(stationID)
@@ -213,11 +228,85 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 		StationID:   1043,
 		StationName: "Ballybofey",
 		SensorRef:   "0001",
-		Datetime:    "2022-06-28T04:14:00Z",
-		Value:       1.679,
+		Datetime:    "2022-06-30T04:15:00Z",
+		Value:       1.879,
 	}
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func TestAddSingleReadingToTheStore(t *testing.T) {
+	t.Parallel()
+	db := createTestDB(waterLevelSchema, t)
+	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
+	readings := rivers.Readings{DB: db}
+
+	want := rivers.WaterLevel{
+		StationID:   3055,
+		StationName: "Glaslough",
+		SensorRef:   "0001",
+		Datetime:    "2022-06-30T19:15:00Z",
+		Value:       0.991,
+	}
+
+	err := readings.Add(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := readings.GetLast(3055)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+
+}
+
+var (
+	waterLevelSchema = `DROP TABLE IF EXISTS waterlevel_readings;
+CREATE TABLE waterlevel_readings (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+station_id INT NOT NULL,
+station_name CHAR(50) NOT NULL,
+sensor_ref CHAR(20) NOT NULL,
+datetime TEXT NOT NULL,
+value REAL);`
+
+	dropWaterLevelSchema = `DROP TABLE waterlevel_readings`
+
+	// DB statements for populating data
+	stmtRetrieveLastReadingForOneStation = `INSERT INTO "waterlevel_readings" (station_id, station_name, sensor_ref, datetime, value) VALUES (1042,'Sandy Millss','0001','2022-06-28T04:45:00Z',0.383);
+INSERT INTO "waterlevel_readings" (station_id, station_name, sensor_ref, datetime, value) VALUES(1043,'Ballybofey','0001','2022-06-28T04:15:00Z',1.679);
+INSERT INTO "waterlevel_readings" (station_id, station_name, sensor_ref, datetime, value) VALUES(1043,'Ballybofey','0001','2022-06-29T05:15:00Z',1.779);
+INSERT INTO "waterlevel_readings" (station_id, station_name, sensor_ref, datetime, value) VALUES(1043,'Ballybofey','0001','2022-06-30T04:15:00Z',1.879);
+INSERT INTO "waterlevel_readings" (station_id, station_name, sensor_ref, datetime, value) VALUES(3055,'Glaslough','0001','2022-06-28T04:45:00Z',0.478);`
+)
+
+func createTestDB(stmt string, t *testing.T) *sqlx.DB {
+	db := sqlx.MustConnect("sqlite3", ":memory:")
+	_, err := db.Exec(stmt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return db
+}
+
+func prepareTestData(stmt string, db *sqlx.DB, t *testing.T) {
+	_, err := db.Exec(stmt)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func cleanupTestDB(stmt string, db *sqlx.DB, t *testing.T) {
+	_, err := db.Exec(stmt)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
