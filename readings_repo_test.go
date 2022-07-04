@@ -23,36 +23,36 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []rivers.WaterLevel{
+	want := []rivers.StationWaterLevelReading{
 		{
-			StationID:   1042,
-			StationName: "Sandy Millss",
-			Datetime:    "2022-06-28 04:45:00-00:00",
-			Value:       383,
+			StationID:  1042,
+			Name:       "Sandy Millss",
+			Readtime:   time.Date(2022, 06, 28, 04, 45, 00, 00, time.UTC),
+			WaterLevel: 383,
 		},
 		{
-			StationID:   1043,
-			StationName: "Ballybofey",
-			Datetime:    "2022-06-28 04:15:00-00:00",
-			Value:       679,
+			StationID:  1043,
+			Name:       "Ballybofey",
+			Readtime:   time.Date(2022, 06, 28, 04, 15, 00, 00, time.UTC),
+			WaterLevel: 679,
 		},
 		{
-			StationID:   1043,
-			StationName: "Ballybofey",
-			Datetime:    "2022-06-29 05:15:00-00:00",
-			Value:       779,
+			StationID:  1043,
+			Name:       "Ballybofey",
+			Readtime:   time.Date(2022, 06, 29, 05, 15, 00, 00, time.UTC),
+			WaterLevel: 779,
 		},
 		{
-			StationID:   1043,
-			StationName: "Ballybofey",
-			Datetime:    "2022-06-30 04:15:00-00:00",
-			Value:       879,
+			StationID:  1043,
+			Name:       "Ballybofey",
+			Readtime:   time.Date(2022, 06, 30, 04, 15, 00, 00, time.UTC),
+			WaterLevel: 879,
 		},
 		{
-			StationID:   3055,
-			StationName: "Glaslough",
-			Datetime:    "2022-06-28 04:45:00-00:00",
-			Value:       478,
+			StationID:  3055,
+			Name:       "Glaslough",
+			Readtime:   time.Date(2022, 06, 28, 04, 45, 00, 00, time.UTC),
+			WaterLevel: 478,
 		},
 	}
 	if !cmp.Equal(want, got) {
@@ -62,9 +62,7 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 
 func TestRetrieveLastReadingForOneStation(t *testing.T) {
 	t.Parallel()
-
 	db := newTestDB(stmtRetrieveLastReadingForOneStation, t)
-
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
 			DB: db,
@@ -84,7 +82,6 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 		Readtime:   readTime,
 		WaterLevel: 879,
 	}
-
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
@@ -93,7 +90,6 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 func TestAddSingleReadingToTheStore(t *testing.T) {
 	t.Parallel()
 	db := newTestDB(stmtEmptyDB, t)
-
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
 			DB: db,
@@ -105,33 +101,27 @@ func TestAddSingleReadingToTheStore(t *testing.T) {
 		Readtime:   time.Now(),
 		WaterLevel: 991,
 	}
-
 	err := readings.Add(want)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	got, err := readings.GetLastReadingForStationID(3055)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
 
-func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
+func TestAdd_DoesNotAddDuplicateReadings(t *testing.T) {
 	t.Parallel()
-
 	db := newTestDB(stmtEmptyDB, t)
-
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
 			DB: db,
 		},
 	}
-
 	want := rivers.StationWaterLevelReading{
 		StationID: 3055,
 		Readtime:  time.Now(),
@@ -140,7 +130,6 @@ func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	got, err := readings.GetLastReadingForStationID(3055)
 	if err != nil {
 		t.Fatal(err)
@@ -148,18 +137,15 @@ func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
-
 	// Try to add the same reading second time.
-	err = readings.AddLatest(want)
+	err = readings.Add(want)
 	if !errors.Is(err, rivers.ErrReadingExists) {
 		t.Fatalf("want ErrReadingExists, got %v", err)
 	}
-
 	gotReadings, err := readings.List()
 	if err != nil {
 		t.Error(err)
 	}
-
 	if len(gotReadings) != 1 {
 		t.Error("it's not filtering out duplicates")
 	}
@@ -171,7 +157,6 @@ func newTestDB(stmtPopulateData string, t *testing.T) *sqlx.DB {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if stmtPopulateData != "" {
 		_, err = db.Exec(stmtPopulateData)
 		if err != nil {

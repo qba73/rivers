@@ -60,19 +60,16 @@ func LoadWaterLevelCSV(path string) ([]WaterLevelReading, error) {
 // timestamp,level
 func ReadWaterLevelCSV(r io.Reader) ([]WaterLevelReading, error) {
 	var levels []WaterLevelReading
-
 	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
 	// before start looping through the lines (records).
 	if _, err := csvreader.Read(); err != nil {
 		return nil, errors.New("error when reading csv file")
 	}
-
 	records, err := csvreader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
-
 	for _, r := range records {
 		level, err := processWaterLevelRecord(r)
 		if err != nil {
@@ -88,7 +85,6 @@ func ReadWaterLevelCSV(r io.Reader) ([]WaterLevelReading, error) {
 // represents temp in Celsius.
 func ReadWaterTemperatureCSV(r io.Reader) ([]WaterTemperatureReading, error) {
 	var levels []WaterTemperatureReading
-
 	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
 	// before start looping through the lines (records).
@@ -120,7 +116,6 @@ func processWaterLevelRecord(r []string) (WaterLevelReading, error) {
 	if err != nil {
 		return WaterLevelReading{}, err
 	}
-
 	return WaterLevelReading{Timestamp: tm, Value: val}, nil
 }
 
@@ -133,7 +128,6 @@ func processWaterTempRecord(r []string) (WaterTemperatureReading, error) {
 	if err != nil {
 		return WaterTemperatureReading{}, err
 	}
-
 	return WaterTemperatureReading{Timestamp: tm, Value: val}, nil
 }
 
@@ -176,7 +170,6 @@ func parseStationGroup(records [][]string) ([]WaterLevelReading, error) {
 	}
 	var gsr []WaterLevelReading
 	stationNames := records[0][1:]
-
 	for _, record := range records[1:] {
 		timestamp, err := time.Parse(gaugeTimeFormat, record[0])
 		if err != nil {

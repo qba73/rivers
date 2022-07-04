@@ -353,6 +353,8 @@ func toMillimeters(s string) (int, error) {
 	return int(v * 1000), nil
 }
 
+// fromStrToInt takes a string representing stationID and
+// returns stationID as int (with trimmed leading zeros).
 func fromStrToInt(s string) (int, error) {
 	st := strings.TrimLeft(s, "0")
 	return strconv.Atoi(st)

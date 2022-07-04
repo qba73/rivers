@@ -28,7 +28,7 @@ func NewSQLiteStore(path string) (*SQLiteStore, error) {
 	}, nil
 }
 
-// Save takes a slice of records and saves them in a file.
+// Save takes a record representing StationWaterLevelReading and saves it in the store.
 func (s *SQLiteStore) Save(record StationWaterLevelReading) error {
 	levelreadings := `INSERT INTO waterlevel_readings (station_id, station_name, datetime, value) VALUES (?, ?, ?, ?)`
 	_, err := s.DB.Exec(levelreadings, record.StationID, record.Name, record.Readtime, record.WaterLevel)
@@ -36,6 +36,29 @@ func (s *SQLiteStore) Save(record StationWaterLevelReading) error {
 		return fmt.Errorf("adding waterlevel reading %#v: %w", record, err)
 	}
 	return nil
+}
+
+func (s *SQLiteStore) List() ([]StationWaterLevelReading, error) {
+	var readings []WaterLevel
+	const query = `SELECT station_id, station_name, datetime, value FROM waterlevel_readings`
+	if err := s.DB.Select(&readings, query); err != nil {
+		return nil, fmt.Errorf("selecting water level readings: %w", err)
+	}
+	var stationsReadings []StationWaterLevelReading
+	for _, r := range readings {
+		readTime, err := time.Parse("2006-01-02 15:04:05-07:00", r.Datetime)
+		if err != nil {
+			return []StationWaterLevelReading{}, err
+		}
+		reading := StationWaterLevelReading{
+			StationID:  r.StationID,
+			Name:       r.StationName,
+			Readtime:   readTime,
+			WaterLevel: r.Value,
+		}
+		stationsReadings = append(stationsReadings, reading)
+	}
+	return stationsReadings, nil
 }
 
 // GetLastReadingForStationID retrieves latest water level reading for given station id.

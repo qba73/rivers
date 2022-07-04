@@ -16,14 +16,9 @@ func OpenReadingsRepo(s Store) *ReadingsRepo {
 	}
 }
 
-// List returns all water level readings.
-func (r *ReadingsRepo) List() ([]WaterLevel, error) {
-	var readings []WaterLevel
-	const query = `SELECT station_id, station_name, datetime, value FROM waterlevel_readings`
-	if err := r.Store.(*SQLiteStore).DB.Select(&readings, query); err != nil {
-		return nil, fmt.Errorf("selecting water level readings: %w", err)
-	}
-	return readings, nil
+// List returns all water level readings from the store.
+func (r *ReadingsRepo) List() ([]StationWaterLevelReading, error) {
+	return r.Store.List()
 }
 
 // GetLastReadingForStationID retrieves latest water level reading for given station id.
@@ -33,26 +28,18 @@ func (r *ReadingsRepo) GetLastReadingForStationID(stationID int) (StationWaterLe
 }
 
 // Add takes a reading and adds it to the store.
-func (r *ReadingsRepo) Add(level StationWaterLevelReading) error {
-	// business logic here...?
-	return r.Store.Save(level)
-}
-
-// AddLatest takes water lever readings and add it to the store
-// if the reading does not already exist. It returns an error
-// if the reading already is present in the store.
-func (r *ReadingsRepo) AddLatest(level StationWaterLevelReading) error {
-	current, err := r.GetLastReadingForStationID(level.StationID)
+func (r *ReadingsRepo) Add(reading StationWaterLevelReading) error {
+	current, err := r.Store.GetLastReadingForStationID(reading.StationID)
 	if err != nil && !errors.Is(err, ErrNoReading) {
-		return err
+		return fmt.Errorf("adding sensor reading: %w", err)
 	}
 	if errors.Is(err, ErrNoReading) {
-		return r.Add(level)
+		return r.Store.Save(reading)
 	}
-	if current.StationID == level.StationID && current.Readtime.Equal(level.Readtime) {
-		return fmt.Errorf("adding sensor reading %v: %w", level, ErrReadingExists)
+	if current.StationID == reading.StationID && current.Readtime.Equal(reading.Readtime) {
+		return fmt.Errorf("adding sensor reading %v: %w", reading, ErrReadingExists)
 	}
-	return r.Add(level)
+	return r.Store.Save(current)
 }
 
 var (

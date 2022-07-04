@@ -4,14 +4,16 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Store is the interface that wraps Save
-// and GetLastReadingForStationID methods.
-//
+// Store is the interface that wraps Save,
+// GetLastReadingForStationID and List methods.
 type Store interface {
-	// Save takes records and stores them in a store.
+	// Save takes a record and stores it in the store.
 	Save(StationWaterLevelReading) error
 
 	// GetLastReadingsForStationID takes station ID and returns
 	// last recorded reading.
 	GetLastReadingForStationID(int) (StationWaterLevelReading, error)
+
+	// List returns all readings from the store.
+	List() ([]StationWaterLevelReading, error)
 }
