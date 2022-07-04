@@ -13,12 +13,12 @@ func TestFileStore_SavesDataToFile(t *testing.T) {
 	t.Parallel()
 	records := []rivers.StationWaterLevelReading{
 		{
-			StationID:  "0000001041",
+			StationID:  1041,
 			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
 			WaterLevel: 1715,
 		},
 		{
-			StationID:  "0000001042",
+			StationID:  1042,
 			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
 			WaterLevel: 2715,
 		},
@@ -54,12 +54,12 @@ func TestFileStore_AppendsDataToFile(t *testing.T) {
 	t.Parallel()
 	records := []rivers.StationWaterLevelReading{
 		{
-			StationID:  "0000001041",
+			StationID:  1041,
 			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
 			WaterLevel: 1715,
 		},
 		{
-			StationID:  "0000001042",
+			StationID:  1042,
 			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
 			WaterLevel: 2715,
 		},
@@ -90,12 +90,12 @@ func TestFileStore_AppendsDataToFile(t *testing.T) {
 	// Append new reading records to the file
 	newRecords := []rivers.StationWaterLevelReading{
 		{
-			StationID:  "0000001051",
+			StationID:  1051,
 			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
 			WaterLevel: 2715,
 		},
 		{
-			StationID:  "0000001052",
+			StationID:  1052,
 			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
 			WaterLevel: 3715,
 		},
@@ -121,22 +121,22 @@ func TestLoadData_ReadsAllRecordsFromFile(t *testing.T) {
 
 	want := []rivers.StationWaterLevelReading{
 		{
-			StationID:  "0000001041",
+			StationID:  1041,
 			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
 			WaterLevel: 1715,
 		},
 		{
-			StationID:  "0000001042",
+			StationID:  1042,
 			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
 			WaterLevel: 2715,
 		},
 		{
-			StationID:  "0000001051",
+			StationID:  1051,
 			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
 			WaterLevel: 2715,
 		},
 		{
-			StationID:  "0000001052",
+			StationID:  1052,
 			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
 			WaterLevel: 3715,
 		},

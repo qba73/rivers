@@ -114,9 +114,15 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 		if p.Properties.SensorRef != sensorTypeLevel {
 			continue
 		}
+
+		stationID, err := fromStrToInt(p.Properties.StationRef)
+		if err != nil {
+			return nil, fmt.Errorf("converting station id from string to int: %w", err)
+		}
+
 		t, err := time.Parse(time.RFC3339, p.Properties.Datetime)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parsing reading time: %w", err)
 		}
 
 		wl, err := toMillimeters(p.Properties.Value)
@@ -124,7 +130,7 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 			return nil, err
 		}
 		reading := StationWaterLevelReading{
-			StationID:  p.Properties.StationRef,
+			StationID:  stationID,
 			Name:       p.Properties.StationName,
 			Readtime:   t,
 			WaterLevel: wl,
@@ -347,6 +353,11 @@ func toMillimeters(s string) (int, error) {
 	return int(v * 1000), nil
 }
 
+func fromStrToInt(s string) (int, error) {
+	st := strings.TrimLeft(s, "0")
+	return strconv.Atoi(st)
+}
+
 // GetLatestWaterLevels returns latests readings from all stations.
 //
 // This func uses default rivers' client under the hood.
@@ -367,7 +378,7 @@ func RunCLI() {
 
 func printReadings(w io.Writer, readings []StationWaterLevelReading) {
 	for _, reading := range readings {
-		fmt.Fprintf(w, "time: %s, station: %s, id: %s, level: %d\n",
-			reading.Readtime, reading.Name, strings.TrimLeft(reading.StationID, "0"), reading.WaterLevel)
+		fmt.Fprintf(w, "time: %s, station: %s, id: %d, level: %d\n",
+			reading.Readtime, reading.Name, reading.StationID, reading.WaterLevel)
 	}
 }

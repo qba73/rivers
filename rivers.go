@@ -214,7 +214,7 @@ type WaterLevelProvider interface {
 // StationWaterLevelReading represents data received
 // from a water level sensor.
 type StationWaterLevelReading struct {
-	StationID  string    `json:"station_id,omitempty"`
+	StationID  int       `json:"station_id,omitempty"`
 	Name       string    `json:"name,omitempty"`
 	Readtime   time.Time `json:"readtime"`
 	WaterLevel int       `json:"water_level"`

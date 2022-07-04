@@ -70,7 +70,7 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 			DB: db,
 		},
 	}
-	got, err := readings.GetLastReadingForStationID("1043")
+	got, err := readings.GetLastReadingForStationID(1043)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := rivers.StationWaterLevelReading{
-		StationID:  "1043",
+		StationID:  1043,
 		Name:       "Ballybofey",
 		Readtime:   readTime,
 		WaterLevel: 879,
@@ -100,7 +100,7 @@ func TestAddSingleReadingToTheStore(t *testing.T) {
 		},
 	}
 	want := rivers.StationWaterLevelReading{
-		StationID:  "3055",
+		StationID:  3055,
 		Name:       "Glaslough",
 		Readtime:   time.Now(),
 		WaterLevel: 991,
@@ -111,7 +111,7 @@ func TestAddSingleReadingToTheStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := readings.GetLastReadingForStationID("3055")
+	got, err := readings.GetLastReadingForStationID(3055)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 	}
 
 	want := rivers.StationWaterLevelReading{
-		StationID: "3055",
+		StationID: 3055,
 		Readtime:  time.Now(),
 	}
 	err := readings.Add(want)
@@ -141,7 +141,7 @@ func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := readings.GetLastReadingForStationID("3055")
+	got, err := readings.GetLastReadingForStationID(3055)
 	if err != nil {
 		t.Fatal(err)
 	}

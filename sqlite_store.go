@@ -3,7 +3,6 @@ package rivers
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -40,8 +39,7 @@ func (s *SQLiteStore) Save(record StationWaterLevelReading) error {
 }
 
 // GetLastReadingForStationID retrieves latest water level reading for given station id.
-func (s *SQLiteStore) GetLastReadingForStationID(strStationID string) (StationWaterLevelReading, error) {
-	stationID, _ := strconv.Atoi(strStationID)
+func (s *SQLiteStore) GetLastReadingForStationID(stationID int) (StationWaterLevelReading, error) {
 	var reading []WaterLevel
 	levelreading := `SELECT station_id, station_name, datetime, value FROM waterlevel_readings WHERE station_id=? order by datetime desc limit 1`
 	if err := s.DB.Select(&reading, levelreading, stationID); err != nil {
@@ -57,7 +55,7 @@ func (s *SQLiteStore) GetLastReadingForStationID(strStationID string) (StationWa
 		return StationWaterLevelReading{}, err
 	}
 	return StationWaterLevelReading{
-		StationID:  fmt.Sprintf("%d", r.StationID),
+		StationID:  r.StationID,
 		Name:       r.StationName,
 		Readtime:   readTime,
 		WaterLevel: r.Value,

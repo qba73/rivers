@@ -26,7 +26,7 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 
 	want := []rivers.StationWaterLevelReading{
 		{
-			StationID:  "0000001041",
+			StationID:  1041,
 			Name:       "Sandy Mills",
 			Readtime:   time.Date(2021, 02, 18, 06, 00, 00, 00, time.UTC),
 			WaterLevel: 1715,
