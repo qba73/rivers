@@ -169,10 +169,10 @@ func ReadGroupCSV(r io.Reader) ([]WaterLevelReading, error) {
 
 func parseStationGroup(records [][]string) ([]WaterLevelReading, error) {
 	if len(records) < 2 {
-		return nil, fmt.Errorf("empty records")
+		return nil, fmt.Errorf("parsing station groups: empty records %v", records)
 	}
 	if len(records[0]) < 2 {
-		return nil, fmt.Errorf("missing station")
+		return nil, errors.New("parsing station groups: missing station")
 	}
 	var gsr []WaterLevelReading
 	stationNames := records[0][1:]
@@ -190,7 +190,7 @@ func parseStationGroup(records [][]string) ([]WaterLevelReading, error) {
 			}
 			levelValue, err := toMillimeters(reading)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("parsing station groups: %w", err)
 			}
 			gr := WaterLevelReading{
 				// Some headers in csv files come with empty spaces, so trim them.

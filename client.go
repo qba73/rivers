@@ -342,7 +342,7 @@ func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]WaterLevelRead
 func toMillimeters(s string) (int, error) {
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("convering to millimeters: %w", err)
 	}
 	return int(v * 1000), nil
 }
