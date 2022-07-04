@@ -12,9 +12,7 @@ import (
 
 func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 	t.Parallel()
-	db := createTestDB(waterLevelSchema, t)
-	prepareTestData(stmtRetrieveLastReadingForOneStation, db, t)
-	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+	db := newTestDB(stmtRetrieveLastReadingForOneStation, t)
 
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
@@ -64,9 +62,8 @@ func TestListGetsAllWaterLevelReadingsFromDatabase(t *testing.T) {
 
 func TestRetrieveLastReadingForOneStation(t *testing.T) {
 	t.Parallel()
-	db := createTestDB(waterLevelSchema, t)
-	prepareTestData(stmtRetrieveLastReadingForOneStation, db, t)
-	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
+	db := newTestDB(stmtRetrieveLastReadingForOneStation, t)
 
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
@@ -95,8 +92,8 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 
 func TestAddSingleReadingToTheStore(t *testing.T) {
 	t.Parallel()
-	db := createTestDB(waterLevelSchema, t)
-	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
+	db := newTestDB(stmtEmptyDB, t)
 
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
@@ -127,8 +124,9 @@ func TestAddSingleReadingToTheStore(t *testing.T) {
 
 func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 	t.Parallel()
-	db := createTestDB(waterLevelSchema, t)
-	defer cleanupTestDB(dropWaterLevelSchema, db, t)
+
+	db := newTestDB(stmtEmptyDB, t)
+
 	readings := rivers.ReadingsRepo{
 		Store: &rivers.SQLiteStore{
 			DB: db,
@@ -168,27 +166,27 @@ func TestAddLatest_DoesNotAddDuplicateReadings(t *testing.T) {
 	}
 }
 
-func createTestDB(stmt string, t *testing.T) *sqlx.DB {
+func newTestDB(stmtPopulateData string, t *testing.T) *sqlx.DB {
 	db := sqlx.MustConnect("sqlite3", ":memory:")
-	_, err := db.Exec(stmt)
+	_, err := db.Exec(waterLevelSchema)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if stmtPopulateData != "" {
+		_, err = db.Exec(stmtPopulateData)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Call the func to clean database after each test.
+	// This way we don't need to pullute test logic with `defer`.
+	t.Cleanup(func() {
+		if _, err := db.Exec(`DROP TABLE waterlevel_readings`); err != nil {
+			t.Fatalf("error cleaning up test database: %#v", err)
+		}
+	})
 	return db
-}
-
-func prepareTestData(stmt string, db *sqlx.DB, t *testing.T) {
-	_, err := db.Exec(stmt)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func cleanupTestDB(stmt string, db *sqlx.DB, t *testing.T) {
-	_, err := db.Exec(stmt)
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 var (
@@ -200,12 +198,11 @@ station_name CHAR(50) NOT NULL,
 datetime TEXT NOT NULL,
 value REAL);`
 
-	dropWaterLevelSchema = `DROP TABLE waterlevel_readings`
-
 	// DB statements for populating data
 	stmtRetrieveLastReadingForOneStation = `INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES (1042,'Sandy Millss','2022-06-28 04:45:00-00:00',0.383);
 INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-28 04:15:00-00:00',1.679);
 INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-29 05:15:00-00:00',1.779);
 INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-30 04:15:00-00:00',1.879);
 INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(3055,'Glaslough','2022-06-28 04:45:00-00:00',0.478);`
+	stmtEmptyDB = ``
 )

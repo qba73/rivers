@@ -12,22 +12,9 @@ import (
 	"github.com/qba73/rivers"
 )
 
-func startServer(path string, datafile string, t *testing.T) *httptest.Server {
-	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		f, err := os.Open(datafile)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer f.Close()
-		io.Copy(rw, f)
-	}))
-	return ts
-}
-
 func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/geojson/latest", "testdata/latest_short.json", t)
-	defer ts.Close()
+	ts := newTestServer("/geojson/latest", "testdata/latest_short.json", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -53,8 +40,7 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 
 func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/day", "testdata/day_01041_0001.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/day", "testdata/day_01041_0001.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -91,8 +77,7 @@ func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 
 func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/week", "testdata/week_01041_0001.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/week", "testdata/week_01041_0001.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -129,8 +114,7 @@ func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 
 func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/month", "testdata/month_01041_0001.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/month", "testdata/month_01041_0001.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -167,8 +151,7 @@ func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 
 func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/day", "testdata/day_01041_0002.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/day", "testdata/day_01041_0002.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -201,8 +184,7 @@ func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 
 func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/week", "testdata/week_01041_0002.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/week", "testdata/week_01041_0002.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -235,8 +217,7 @@ func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 
 func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/month", "testdata/month_01041_0002.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/month", "testdata/month_01041_0002.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -269,8 +250,7 @@ func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 
 func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 	t.Parallel()
-	ts := startServer("/data/group", "testdata/group_1.csv", t)
-	defer ts.Close()
+	ts := newTestServer("/data/group", "testdata/group_1.csv", t)
 
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
@@ -306,4 +286,21 @@ func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+}
+
+func newTestServer(path string, datafile string, t *testing.T) *httptest.Server {
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		f, err := os.Open(datafile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		io.Copy(rw, f)
+	}))
+
+	t.Cleanup(func() {
+		ts.Close()
+	})
+
+	return ts
 }

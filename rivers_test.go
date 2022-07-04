@@ -15,21 +15,20 @@ import (
 )
 
 func setup(t *testing.T) *os.File {
-	return testhelper.TmpTextFile(t, "", "data.csv", `datetime,value
+	file := testhelper.TmpTextFile(t, "", "data.csv", `datetime,value
 2021-02-10 13:00,1.772
 2021-02-10 13:15,1.771
 2021-02-10 13:30,1.769
 2021-02-10 13:45,1.769
 2021-02-10 14:00,1.768`)
-}
 
-func cleanup(file *os.File) {
-	os.Remove(file.Name())
+	t.Cleanup(func() {
+		os.Remove(file.Name())
+	})
+	return file
 }
 
 func TestLoadCSV(t *testing.T) {
-	t.Parallel()
-
 	tt := []struct {
 		name        string
 		filePath    string
@@ -42,6 +41,7 @@ func TestLoadCSV(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := rivers.LoadCSV(tc.filePath)
 			if (err != nil) != tc.expectedErr {
 				t.Fatalf("%s, LoadCSV(%q) failed, error: %v", tc.name, tc.filePath, err)
@@ -56,7 +56,6 @@ func TestLoadCSV(t *testing.T) {
 
 func TestReadCSV(t *testing.T) {
 	file := setup(t)
-	defer cleanup(file)
 
 	csvFile, err := os.Open(file.Name())
 	if err != nil {
