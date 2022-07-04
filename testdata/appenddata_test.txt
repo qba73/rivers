@@ -1,2 +1,2 @@
-[{"station_id":"0000001041","readtime":"2021-02-18T06:00:00Z","water_level":1.715},{"station_id":"0000001042","readtime":"2021-02-18T07:00:00Z","water_level":2.715}]
-[{"station_id":"0000001051","readtime":"2021-02-18T06:00:00Z","water_level":2.715},{"station_id":"0000001052","readtime":"2021-02-18T07:00:00Z","water_level":3.715}]
+[{"station_id":"0000001041","readtime":"2021-02-18T06:00:00Z","water_level":1715},{"station_id":"0000001042","readtime":"2021-02-18T07:00:00Z","water_level":2715}]
+[{"station_id":"0000001051","readtime":"2021-02-18T06:00:00Z","water_level":2715},{"station_id":"0000001052","readtime":"2021-02-18T07:00:00Z","water_level":3715}]

@@ -38,21 +38,16 @@ Pull requests welcome!
 
 ## Using the CLI utility for reading water levels
 
-Get readings from stations:
+Get readings from stations (water level in millimeters):
 ```
 $ waterlevel
-time: 2022-06-24 05:45:00 +0000 UTC, station: Sandy Mills, id: 1041, level: 0.21
-time: 2022-06-24 05:15:00 +0000 UTC, station: Ballybofey, id: 1043, level: 0.46
-time: 2022-06-24 05:45:00 +0000 UTC, station: Glaslough, id: 3055, level: 0.43
-time: 2022-06-24 05:45:00 +0000 UTC, station: Cappog Bridge, id: 3058, level: 0.20
-time: 2022-06-24 05:45:00 +0000 UTC, station: Moyles Mill, id: 6011, level: 0.39
-time: 2022-06-24 05:45:00 +0000 UTC, station: Clarebane, id: 6012, level: 0.24
-time: 2022-06-24 05:45:00 +0000 UTC, station: Charleville Weir, id: 6013, level: 0.28
-time: 2022-06-24 05:45:00 +0000 UTC, station: Tallanstown Weir, id: 6014, level: 0.29
-time: 2022-06-24 05:45:00 +0000 UTC, station: Mansfieldstown, id: 6021, level: -0.07
 [...]
-time: 2022-06-24 05:45:00 +0000 UTC, station: Ballyloskey, id: 40008, level: 0.51
-time: 2022-06-24 05:45:00 +0000 UTC, station: Malin Head, id: 40060, level: 3.50
+time: 2022-07-04 00:15:00 +0000 UTC, station: Innisconnell Pier, id: 36084, level: 1152
+time: 2022-07-04 09:30:00 +0000 UTC, station: Clonconwal, id: 38001, level: 619
+time: 2022-07-04 09:30:00 +0000 UTC, station: Glenties, id: 38010, level: 810
+time: 2022-07-03 11:30:00 +0000 UTC, station: New Mills, id: 39001, level: 210
+time: 2022-07-04 09:30:00 +0000 UTC, station: Tullyarvan, id: 39003, level: 327
+[...]
 ```
 
 Save readings to a file:

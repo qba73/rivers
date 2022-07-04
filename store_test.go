@@ -14,13 +14,13 @@ func TestFileStore_SavesDataToFile(t *testing.T) {
 	records := []rivers.StationWaterLevelReading{
 		{
 			StationID:  "0000001041",
-			Readtime:   time.Date(2021, 0o2, 18, 0o6, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 1.715,
+			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
+			WaterLevel: 1715,
 		},
 		{
 			StationID:  "0000001042",
-			Readtime:   time.Date(2021, 0o2, 18, 0o7, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 2.715,
+			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
+			WaterLevel: 2715,
 		},
 	}
 	path := t.TempDir() + "/data_test.txt"
@@ -55,13 +55,13 @@ func TestFileStore_AppendsDataToFile(t *testing.T) {
 	records := []rivers.StationWaterLevelReading{
 		{
 			StationID:  "0000001041",
-			Readtime:   time.Date(2021, 0o2, 18, 0o6, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 1.715,
+			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
+			WaterLevel: 1715,
 		},
 		{
 			StationID:  "0000001042",
-			Readtime:   time.Date(2021, 0o2, 18, 0o7, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 2.715,
+			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
+			WaterLevel: 2715,
 		},
 	}
 
@@ -91,13 +91,13 @@ func TestFileStore_AppendsDataToFile(t *testing.T) {
 	newRecords := []rivers.StationWaterLevelReading{
 		{
 			StationID:  "0000001051",
-			Readtime:   time.Date(2021, 0o2, 18, 0o6, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 2.715,
+			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
+			WaterLevel: 2715,
 		},
 		{
 			StationID:  "0000001052",
-			Readtime:   time.Date(2021, 0o2, 18, 0o7, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 3.715,
+			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
+			WaterLevel: 3715,
 		},
 	}
 	s.Save(newRecords)
@@ -122,23 +122,23 @@ func TestLoadData_ReadsAllRecordsFromFile(t *testing.T) {
 	want := []rivers.StationWaterLevelReading{
 		{
 			StationID:  "0000001041",
-			Readtime:   time.Date(2021, 0o2, 18, 0o6, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 1.715,
+			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
+			WaterLevel: 1715,
 		},
 		{
 			StationID:  "0000001042",
-			Readtime:   time.Date(2021, 0o2, 18, 0o7, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 2.715,
+			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
+			WaterLevel: 2715,
 		},
 		{
 			StationID:  "0000001051",
-			Readtime:   time.Date(2021, 0o2, 18, 0o6, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 2.715,
+			Readtime:   time.Date(2021, 2, 18, 6, 0, 0, 0, time.UTC),
+			WaterLevel: 2715,
 		},
 		{
 			StationID:  "0000001052",
-			Readtime:   time.Date(2021, 0o2, 18, 0o7, 0o0, 0o0, 0o0, time.UTC),
-			WaterLevel: 3.715,
+			Readtime:   time.Date(2021, 2, 18, 7, 0, 0, 0, time.UTC),
+			WaterLevel: 3715,
 		},
 	}
 

@@ -68,8 +68,8 @@ func (s *SQLiteStore) GetLastReadingForStationID(strStationID string) (StationWa
 // recorded at the given time by the sensor installed
 // in the station.
 type WaterLevel struct {
-	StationID   int     `db:"station_id"`
-	StationName string  `db:"station_name"`
-	Datetime    string  `db:"datetime"`
-	Value       float64 `db:"value"`
+	StationID   int    `db:"station_id"`
+	StationName string `db:"station_name"`
+	Datetime    string `db:"datetime"`
+	Value       int    `db:"value"`
 }

@@ -18,7 +18,21 @@ const (
 
 // Reading represents water level recorded
 // by a gauge at the particular time.
-type Reading struct {
+type WaterLevelReading struct {
+	Name      string
+	RefID     string
+	Timestamp time.Time
+	Value     int
+}
+
+type WaterTemperatureReading struct {
+	Name      string
+	RefID     string
+	Timestamp time.Time
+	Value     float64
+}
+
+type VoltageReading struct {
 	Name      string
 	RefID     string
 	Timestamp time.Time
@@ -26,26 +40,26 @@ type Reading struct {
 }
 
 // String prints out information about the reading.
-func (rd Reading) String() string {
+func (rd WaterLevelReading) String() string {
 	return fmt.Sprintf("Name: %s, Time: %s, Value: %v", rd.Name, rd.Timestamp, rd.Value)
 }
 
-// LoadCSV knows how to open and read given csv file.
+// LoadWaterLevelCSV knows how to open and read given csv file.
 // Upon successful run it returns a slice of level structs.
-func LoadCSV(path string) ([]Reading, error) {
+func LoadWaterLevelCSV(path string) ([]WaterLevelReading, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	return ReadCSV(f)
+	return ReadWaterLevelCSV(f)
 }
 
 // ReadCSV knows how to read a csv file containing
 // readings from a gauge in a format:
 // timestamp,level
-func ReadCSV(r io.Reader) ([]Reading, error) {
-	var levels []Reading
+func ReadWaterLevelCSV(r io.Reader) ([]WaterLevelReading, error) {
+	var levels []WaterLevelReading
 
 	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
@@ -60,7 +74,7 @@ func ReadCSV(r io.Reader) ([]Reading, error) {
 	}
 
 	for _, r := range records {
-		level, err := processRecord(r)
+		level, err := processWaterLevelRecord(r)
 		if err != nil {
 			return nil, fmt.Errorf("error processing csv record: %v", err)
 		}
@@ -69,36 +83,82 @@ func ReadCSV(r io.Reader) ([]Reading, error) {
 	return levels, nil
 }
 
-func processRecord(r []string) (Reading, error) {
-	tm, err := processTimestamp(r)
-	if err != nil {
-		return Reading{}, err
-	}
-	val, err := processValue(r)
-	if err != nil {
-		return Reading{}, err
+// ReadWaterTemperatureCSV knows how to read a csv file containing
+// readings from a gauge in a format: `timestamp,value`. The value
+// represents temp in Celsius.
+func ReadWaterTemperatureCSV(r io.Reader) ([]WaterTemperatureReading, error) {
+	var levels []WaterTemperatureReading
+
+	csvreader := csv.NewReader(r)
+	// We are not interested in the CSV header. We read it
+	// before start looping through the lines (records).
+	if _, err := csvreader.Read(); err != nil {
+		return nil, errors.New("error when reading csv file")
 	}
 
-	return Reading{Timestamp: tm, Value: val}, nil
+	records, err := csvreader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range records {
+		level, err := processWaterTempRecord(r)
+		if err != nil {
+			return nil, fmt.Errorf("error processing csv record: %v", err)
+		}
+		levels = append(levels, level)
+	}
+	return levels, nil
+}
+
+func processWaterLevelRecord(r []string) (WaterLevelReading, error) {
+	tm, err := processTimestamp(r)
+	if err != nil {
+		return WaterLevelReading{}, err
+	}
+	val, err := processWaterLevelValue(r)
+	if err != nil {
+		return WaterLevelReading{}, err
+	}
+
+	return WaterLevelReading{Timestamp: tm, Value: val}, nil
+}
+
+func processWaterTempRecord(r []string) (WaterTemperatureReading, error) {
+	tm, err := processTimestamp(r)
+	if err != nil {
+		return WaterTemperatureReading{}, err
+	}
+	val, err := processWaterTempValue(r)
+	if err != nil {
+		return WaterTemperatureReading{}, err
+	}
+
+	return WaterTemperatureReading{Timestamp: tm, Value: val}, nil
 }
 
 func processTimestamp(record []string) (time.Time, error) {
-	tm, err := time.Parse(gaugeTimeFormat, record[0])
-	if err != nil {
-		return time.Time{}, err
+	if len(record) < 1 {
+		return time.Time{}, fmt.Errorf("processing timestamp: invalid record %v", record)
 	}
-	return tm, nil
+	return time.Parse(gaugeTimeFormat, record[0])
 }
 
-func processValue(record []string) (float64, error) {
-	val, err := strconv.ParseFloat(record[1], 64)
-	if err != nil {
-		return 0, nil
+func processWaterLevelValue(record []string) (int, error) {
+	if len(record) != 2 {
+		return 0, fmt.Errorf("processing water level value: invalid record %v", record)
 	}
-	return val, nil
+	return toMillimeters(record[1])
 }
 
-func ReadGroupCSV(r io.Reader) ([]Reading, error) {
+func processWaterTempValue(record []string) (float64, error) {
+	if len(record) != 2 {
+		return 0, fmt.Errorf("processing water temp value: invalid record %v", record)
+	}
+	return strconv.ParseFloat(record[1], 64)
+}
+
+func ReadGroupCSV(r io.Reader) ([]WaterLevelReading, error) {
 	csvreader := csv.NewReader(r)
 	records, err := csvreader.ReadAll()
 	if err != nil {
@@ -107,14 +167,14 @@ func ReadGroupCSV(r io.Reader) ([]Reading, error) {
 	return parseStationGroup(records)
 }
 
-func parseStationGroup(records [][]string) ([]Reading, error) {
+func parseStationGroup(records [][]string) ([]WaterLevelReading, error) {
 	if len(records) < 2 {
 		return nil, fmt.Errorf("empty records")
 	}
 	if len(records[0]) < 2 {
 		return nil, fmt.Errorf("missing station")
 	}
-	var gsr []Reading
+	var gsr []WaterLevelReading
 	stationNames := records[0][1:]
 
 	for _, record := range records[1:] {
@@ -128,11 +188,11 @@ func parseStationGroup(records [][]string) ([]Reading, error) {
 			if reading == "" {
 				continue
 			}
-			levelValue, err := strconv.ParseFloat(reading, 64)
+			levelValue, err := toMillimeters(reading)
 			if err != nil {
 				return nil, err
 			}
-			gr := Reading{
+			gr := WaterLevelReading{
 				// Some headers in csv files come with empty spaces, so trim them.
 				Name:      strings.TrimSpace(stationNames[i]),
 				Timestamp: timestamp,
@@ -157,7 +217,7 @@ type StationWaterLevelReading struct {
 	StationID  string    `json:"station_id,omitempty"`
 	Name       string    `json:"name,omitempty"`
 	Readtime   time.Time `json:"readtime"`
-	WaterLevel float64   `json:"water_level"`
+	WaterLevel int       `json:"water_level"`
 }
 
 type StationGroupReading struct {
@@ -166,5 +226,5 @@ type StationGroupReading struct {
 	StationID    string    `json:"station_id"`
 	Name         string    `json:"name,omitempty"`
 	Readtime     time.Time `json:"readtime"`
-	ReadingValue float64   `json:"reading_value"`
+	ReadingValue int       `json:"reading_value"`
 }

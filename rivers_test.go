@@ -42,7 +42,7 @@ func TestLoadCSV(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := rivers.LoadCSV(tc.filePath)
+			got, err := rivers.LoadWaterLevelCSV(tc.filePath)
 			if (err != nil) != tc.expectedErr {
 				t.Fatalf("%s, LoadCSV(%q) failed, error: %v", tc.name, tc.filePath, err)
 			}
@@ -62,7 +62,7 @@ func TestReadCSV(t *testing.T) {
 		t.Fatalf("can't read csv data: %s", err)
 	}
 
-	data, err := rivers.ReadCSV(csvFile)
+	data, err := rivers.ReadWaterLevelCSV(csvFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,9 +77,9 @@ func TestReadCSV(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wantValue := 1.772
+	wantValue := 1772
 
-	want := rivers.Reading{
+	want := rivers.WaterLevelReading{
 		Timestamp: wantTimestamp,
 		Value:     wantValue,
 	}
@@ -115,26 +115,26 @@ func TestParseStationGroup_ErrorsOnNoStationInCSV(t *testing.T) {
 
 func TestParseStationGroup_ParsesSingleRecord(t *testing.T) {
 	t.Parallel()
-	want := []rivers.Reading{
+	want := []rivers.WaterLevelReading{
 		{
 			Name:      "John's Bridge Nore",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.466,
+			Value:     466,
 		},
 		{
 			Name:      "Dinin Bridge",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.053,
+			Value:     53,
 		},
 		{
 			Name:      "Brownsbarn",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.413,
+			Value:     413,
 		},
 		{
 			Name:      "Mount Juliet",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.451,
+			Value:     451,
 		},
 	}
 
@@ -150,46 +150,46 @@ func TestParseStationGroup_ParsesSingleRecord(t *testing.T) {
 
 func TestParseStationGroup_ParsesMultipleRecords(t *testing.T) {
 	t.Parallel()
-	want := []rivers.Reading{
+	want := []rivers.WaterLevelReading{
 		{
 			Name:      "John's Bridge Nore",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.466,
+			Value:     466,
 		},
 		{
 			Name:      "Dinin Bridge",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.053,
+			Value:     53,
 		},
 		{
 			Name:      "Brownsbarn",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.413,
+			Value:     413,
 		},
 		{
 			Name:      "Mount Juliet",
 			Timestamp: time.Date(2021, time.June, 15, 22, 00, 00, 00, time.UTC),
-			Value:     0.451,
+			Value:     451,
 		},
 		{
 			Name:      "John's Bridge Nore",
 			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
-			Value:     0.400,
+			Value:     400,
 		},
 		{
 			Name:      "Dinin Bridge",
 			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
-			Value:     0.500,
+			Value:     500,
 		},
 		{
 			Name:      "Brownsbarn",
 			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
-			Value:     0.400,
+			Value:     400,
 		},
 		{
 			Name:      "Mount Juliet",
 			Timestamp: time.Date(2021, time.June, 15, 22, 15, 00, 00, time.UTC),
-			Value:     0.400,
+			Value:     400,
 		},
 	}
 

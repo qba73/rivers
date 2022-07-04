@@ -29,7 +29,7 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 			StationID:  "0000001041",
 			Name:       "Sandy Mills",
 			Readtime:   time.Date(2021, 02, 18, 06, 00, 00, 00, time.UTC),
-			WaterLevel: 1.715,
+			WaterLevel: 1715,
 		},
 	}
 
@@ -45,22 +45,22 @@ func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterLevelReading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			Value:     0.294,
+			Value:     294,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 	}
 
@@ -82,22 +82,22 @@ func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterLevelReading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			Value:     0.294,
+			Value:     294,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 	}
 
@@ -119,22 +119,22 @@ func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterLevelReading{
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 00, 00, 00, time.UTC),
-			Value:     0.294,
+			Value:     294,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 15, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 30, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 		{
 			Timestamp: time.Date(2021, 07, 10, 00, 45, 00, 00, time.UTC),
-			Value:     0.293,
+			Value:     293,
 		},
 	}
 
@@ -156,7 +156,7 @@ func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterTemperatureReading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
@@ -189,7 +189,7 @@ func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterTemperatureReading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
@@ -222,7 +222,7 @@ func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	want := []rivers.Reading{
+	want := []rivers.WaterTemperatureReading{
 		{
 			Timestamp: time.Date(2021, 07, 15, 22, 00, 00, 00, time.UTC),
 			Value:     19.900,
@@ -259,22 +259,22 @@ func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 		{
 			Name:       "John's Bridge Nore",
 			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			WaterLevel: 0.466,
+			WaterLevel: 466,
 		},
 		{
 			Name:       "Dinin Bridge",
 			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			WaterLevel: 0.053,
+			WaterLevel: 53,
 		},
 		{
 			Name:       "Brownsbarn",
 			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			WaterLevel: 0.413,
+			WaterLevel: 413,
 		},
 		{
 			Name:       "Mount Juliet",
 			Readtime:   time.Date(2021, 06, 15, 22, 00, 00, 00, time.UTC),
-			WaterLevel: 0.451,
+			WaterLevel: 451,
 		},
 	}
 

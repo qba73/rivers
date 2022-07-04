@@ -118,7 +118,8 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 		if err != nil {
 			return nil, err
 		}
-		wl, err := strconv.ParseFloat(p.Properties.Value, 64)
+
+		wl, err := toMillimeters(p.Properties.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +136,7 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 
 // GetDayLevel knows how to return water level readings recorded for
 // last 24hr period for the given stationID number.
-func (c *Client) GetDayLevel(stationID string) ([]Reading, error) {
+func (c *Client) GetDayLevel(stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "day")
 	if err != nil {
 		return nil, err
@@ -144,12 +145,12 @@ func (c *Client) GetDayLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterLevelCSV(req)
 }
 
 // GetWeekLevel knows how to return water level readings recorded for
 // last week period for the given stationID number.
-func (c *Client) GetWeekLevel(stationID string) ([]Reading, error) {
+func (c *Client) GetWeekLevel(stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "week")
 	if err != nil {
 		return nil, err
@@ -158,12 +159,12 @@ func (c *Client) GetWeekLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterLevelCSV(req)
 }
 
 // GetMonthLevel knows how to return water level readings recorded for
 // last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthLevel(stationID string) ([]Reading, error) {
+func (c *Client) GetMonthLevel(stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "month")
 	if err != nil {
 		return nil, err
@@ -172,12 +173,12 @@ func (c *Client) GetMonthLevel(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterLevelCSV(req)
 }
 
 // GetDayTemperature knows how to return water temperature
 // recorded for last 24hr period for the given stationID number.
-func (c *Client) GetDayTemperature(stationID string) ([]Reading, error) {
+func (c *Client) GetDayTemperature(stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "day")
 	if err != nil {
 		return nil, err
@@ -186,12 +187,12 @@ func (c *Client) GetDayTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterTemperatureCSV(req)
 }
 
 // GetWeekTemperature knows how to return water temperature
 // recorded for last week period for the given stationID number.
-func (c *Client) GetWeekTemperature(stationID string) ([]Reading, error) {
+func (c *Client) GetWeekTemperature(stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "week")
 	if err != nil {
 		return nil, err
@@ -200,12 +201,12 @@ func (c *Client) GetWeekTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterTemperatureCSV(req)
 }
 
 // GetMonthTemperature knows how to return water temperature
 // recorded for last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthTemperature(stationID string) ([]Reading, error) {
+func (c *Client) GetMonthTemperature(stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "month")
 	if err != nil {
 		return nil, err
@@ -214,20 +215,7 @@ func (c *Client) GetMonthTemperature(stationID string) ([]Reading, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.sendRequestCSV(req)
-}
-
-// GetDayVoltage knows how to return sensor voltage data recorded over last 24h.
-func (c *Client) GetDayVoltage(stationID string) ([]Reading, error) {
-	url, err := c.urlVoltage(stationID, "day")
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	return c.sendRequestCSV(req)
+	return c.requestWaterTemperatureCSV(req)
 }
 
 // GetGroupWaterLevel returns water level readings for
@@ -282,16 +270,6 @@ func (c *Client) urlTemperature(stationID, period string) (string, error) {
 	return fmt.Sprintf("%s/data/%s/%s_000%v.csv", c.BaseURL, period, stationID, tempSensor), nil
 }
 
-// urlVoltage takes stationid and time period and builds a valid url.
-// If the period is not valid it errors. Period value should be
-// one of 'day', 'week' or 'month'.
-func (c *Client) urlVoltage(stationID, period string) (string, error) {
-	if !slices.Contains(validPeriods, period) {
-		return "", fmt.Errorf("invalid period %q, expecting one of 'day', 'week', 'month'", period)
-	}
-	return fmt.Sprintf("%s/data/%s/%s_000%v.csv", c.BaseURL, period, stationID, voltageSensor), nil
-}
-
 func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
@@ -312,7 +290,7 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	return json.NewDecoder(res.Body).Decode(&v)
 }
 
-func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
+func (c *Client) requestWaterLevelCSV(req *http.Request) ([]WaterLevelReading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
@@ -324,10 +302,25 @@ func (c *Client) sendRequestCSV(req *http.Request) ([]Reading, error) {
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
-	return ReadCSV(res.Body)
+	return ReadWaterLevelCSV(res.Body)
 }
 
-func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]Reading, error) {
+func (c *Client) requestWaterTemperatureCSV(req *http.Request) ([]WaterTemperatureReading, error) {
+	req.Header.Set("Content-Type", "text/csv")
+	req.Header.Set("Accept", "text/csv")
+	req.Header.Set("User-Agent", c.UserAgent)
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+	return ReadWaterTemperatureCSV(res.Body)
+}
+
+func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]WaterLevelReading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
@@ -340,6 +333,18 @@ func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]Reading, error
 		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
 	return ReadGroupCSV(res.Body)
+}
+
+// toMillimeters takes a string representing a float value
+// of water level sensor reading in meters and converts
+// it to integer representing water level in millimeters.
+// It errors if the input string does not represent a float value.
+func toMillimeters(s string) (int, error) {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0, err
+	}
+	return int(v * 1000), nil
 }
 
 // GetLatestWaterLevels returns latests readings from all stations.
@@ -362,7 +367,7 @@ func RunCLI() {
 
 func printReadings(w io.Writer, readings []StationWaterLevelReading) {
 	for _, reading := range readings {
-		fmt.Fprintf(w, "time: %s, station: %s, id: %s, level: %.2f\n",
+		fmt.Fprintf(w, "time: %s, station: %s, id: %s, level: %d\n",
 			reading.Readtime, reading.Name, strings.TrimLeft(reading.StationID, "0"), reading.WaterLevel)
 	}
 }

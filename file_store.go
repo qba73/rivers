@@ -26,7 +26,7 @@ func NewFileStore(path string) (*FileStore, error) {
 
 // Save takes a slice of records and saves them in a file.
 func (fs *FileStore) Save(records []StationWaterLevelReading) error {
-	f, err := os.OpenFile(fs.path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0o600)
+	f, err := os.OpenFile(fs.path, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return err
 	}
