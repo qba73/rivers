@@ -30,7 +30,7 @@ func NewSQLiteStore(path string) (*SQLiteStore, error) {
 
 // Save takes a record representing StationWaterLevelReading and saves it in the store.
 func (s *SQLiteStore) Save(record StationWaterLevelReading) error {
-	levelreadings := `INSERT INTO waterlevel_readings (station_id, station_name, datetime, value) VALUES (?, ?, ?, ?)`
+	levelreadings := `INSERT INTO waterlevel_readings (station_id, station_name, datetime, value) VALUES (?, ?, datetime(?), ?)`
 	_, err := s.DB.Exec(levelreadings, record.StationID, record.Name, record.Readtime, record.WaterLevel)
 	if err != nil {
 		return fmt.Errorf("adding waterlevel reading %#v: %w", record, err)
@@ -38,6 +38,7 @@ func (s *SQLiteStore) Save(record StationWaterLevelReading) error {
 	return nil
 }
 
+// List returns all water level reading recorded in the database.
 func (s *SQLiteStore) List() ([]StationWaterLevelReading, error) {
 	var readings []WaterLevel
 	const query = `SELECT station_id, station_name, datetime, value FROM waterlevel_readings`
@@ -46,7 +47,7 @@ func (s *SQLiteStore) List() ([]StationWaterLevelReading, error) {
 	}
 	var stationsReadings []StationWaterLevelReading
 	for _, r := range readings {
-		readTime, err := time.Parse("2006-01-02 15:04:05-07:00", r.Datetime)
+		readTime, err := parseDatetime(r.Datetime)
 		if err != nil {
 			return []StationWaterLevelReading{}, err
 		}
@@ -73,7 +74,7 @@ func (s *SQLiteStore) GetLastReadingForStationID(stationID int) (StationWaterLev
 	}
 	r := reading[0]
 	//	Mon Jan 2 15:04:05 MST 2006
-	readTime, err := time.Parse("2006-01-02 15:04:05-07:00", r.Datetime)
+	readTime, err := parseDatetime(r.Datetime)
 	if err != nil {
 		return StationWaterLevelReading{}, err
 	}
@@ -83,6 +84,10 @@ func (s *SQLiteStore) GetLastReadingForStationID(stationID int) (StationWaterLev
 		Readtime:   readTime,
 		WaterLevel: r.Value,
 	}, nil
+}
+
+func parseDatetime(date string) (time.Time, error) {
+	return time.Parse("2006-01-02 15:04:05", date)
 }
 
 // WaterLevel represents water level value

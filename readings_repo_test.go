@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/qba73/rivers"
 )
@@ -72,14 +73,10 @@ func TestRetrieveLastReadingForOneStation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	readTime, err := time.Parse("2006-01-02 15:04:05-07:00", "2022-06-30 04:15:00-00:00")
-	if err != nil {
-		t.Fatal(err)
-	}
 	want := rivers.StationWaterLevelReading{
 		StationID:  1043,
 		Name:       "Ballybofey",
-		Readtime:   readTime,
+		Readtime:   time.Date(2022, 06, 30, 04, 15, 00, 00, time.UTC),
 		WaterLevel: 879,
 	}
 	if !cmp.Equal(want, got) {
@@ -109,7 +106,7 @@ func TestAddSingleReadingToTheStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.IgnoreFields(rivers.StationWaterLevelReading{}, "Readtime")) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
@@ -124,7 +121,7 @@ func TestAdd_DoesNotAddDuplicateReadings(t *testing.T) {
 	}
 	want := rivers.StationWaterLevelReading{
 		StationID: 3055,
-		Readtime:  time.Now(),
+		Readtime:  time.Date(2022, 06, 28, 04, 15, 00, 00, time.UTC),
 	}
 	err := readings.Add(want)
 	if err != nil {
@@ -134,7 +131,7 @@ func TestAdd_DoesNotAddDuplicateReadings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.IgnoreFields(rivers.StationWaterLevelReading{}, "Readtime")) {
 		t.Error(cmp.Diff(want, got))
 	}
 	// Try to add the same reading second time.
@@ -183,10 +180,10 @@ datetime TEXT NOT NULL,
 value INTEGER);`
 
 	// DB statements for populating data
-	stmtRetrieveLastReadingForOneStation = `INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES (1042,'Sandy Millss','2022-06-28 04:45:00-00:00',383);
-INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-28 04:15:00-00:00',679);
-INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-29 05:15:00-00:00',779);
-INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey','2022-06-30 04:15:00-00:00',879);
-INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(3055,'Glaslough','2022-06-28 04:45:00-00:00',478);`
+	stmtRetrieveLastReadingForOneStation = `INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES (1042,'Sandy Millss',datetime('2022-06-28 04:45:00-00:00'),383);
+INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey',datetime('2022-06-28 04:15:00-00:00'),679);
+INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey',datetime('2022-06-29 05:15:00-00:00'),779);
+INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(1043,'Ballybofey',datetime('2022-06-30 04:15:00-00:00'),879);
+INSERT INTO "waterlevel_readings" (station_id, station_name, datetime, value) VALUES(3055,'Glaslough',datetime('2022-06-28 04:45:00-00:00'),478);`
 	stmtEmptyDB = ``
 )

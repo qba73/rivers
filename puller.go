@@ -25,10 +25,18 @@ func WithInterval(duration string) option {
 	}
 }
 
+func WithLogger(l *log.Logger) option {
+	return func(p *Puller) error {
+		p.Log = l
+		return nil
+	}
+}
+
 type Puller struct {
 	Client      *Client
 	ReadingRepo *ReadingsRepo
 	Interval    time.Duration
+	Log         *log.Logger
 }
 
 func NewPuller(opts ...option) (*Puller, error) {
@@ -55,25 +63,30 @@ func NewPuller(opts ...option) (*Puller, error) {
 }
 
 func (p *Puller) Run() error {
-	stationReadings, err := p.Client.GetLatestWaterLevels()
-	if err != nil {
-		return err
-	}
-	for _, reading := range stationReadings {
-		err = p.ReadingRepo.Add(reading)
+	p.Log.Printf("puller : Start water levels puller with interval: %s", p.Interval)
+	for range time.NewTicker(p.Interval).C {
+		// todo: implement re-try
+		p.Log.Println("puller : Pull latest water levels")
+		stationReadings, err := p.Client.GetLatestWaterLevels()
 		if err != nil {
-			return err
+			return fmt.Errorf("retriving water level data: %w", err)
 		}
+		for _, reading := range stationReadings {
+			err = p.ReadingRepo.Add(reading)
+			if errors.Is(err, ErrReadingExists) {
+				continue
+			}
+		}
+		p.Log.Printf("puller : Saved latest water levels, resuming in %s", p.Interval.String())
 	}
 	return nil
 }
 
-// RunPuller holds all required machinery
-// to run the river data puller.
+// RunPuller holds all required machinery to run the water levels data puller.
 func RunPuller() {
 	fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	interval := flag.String("interval", "5m", "data puling interval, example: 5m, 30m, 1h")
-	help := flag.Bool("h", false, "show usage and exit")
+	interval := fset.String("interval", "5m", "data pulling interval, example: 5m, 30m, 1h")
+	help := fset.Bool("h", false, "show usage and exit")
 	if err := fset.Parse(os.Args[1:]); err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
@@ -81,28 +94,25 @@ func RunPuller() {
 
 	if *help {
 		fmt.Fprint(os.Stdout, pullerUsage)
+		os.Exit(0)
 	}
 
 	log := log.New(os.Stdout, "PULLER : ", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	p, err := NewPuller(
 		WithInterval(*interval),
+		WithLogger(log),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Println("puller: Start pulling sensor data")
-
-	for range time.NewTicker(p.Interval).C {
-		log.Println("puller: Pulling data")
-		if err := p.Run(); err != nil {
-			break
-		}
-		log.Printf("puller: Data saved. Resuming in %s", *interval)
+	if err := p.Run(); err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
 
-var pullerUsage = `
+var pullerUsage string = `
 waterlevel - water levels sensor data collector.
 
 Flags:

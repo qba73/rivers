@@ -9,7 +9,8 @@ type ReadingsRepo struct {
 	Store Store
 }
 
-// OpenReadingsRepo returns database connection.
+// OpenReadingsRepo returns the repo reader with
+// given implementation of the data store.
 func OpenReadingsRepo(s Store) *ReadingsRepo {
 	return &ReadingsRepo{
 		Store: s,
@@ -36,13 +37,19 @@ func (r *ReadingsRepo) Add(reading StationWaterLevelReading) error {
 	if errors.Is(err, ErrNoReading) {
 		return r.Store.Save(reading)
 	}
-	if current.StationID == reading.StationID && current.Readtime.Equal(reading.Readtime) {
+	if current.StationID == reading.StationID && reading.Readtime.Equal(current.Readtime) {
 		return fmt.Errorf("adding sensor reading %v: %w", reading, ErrReadingExists)
 	}
-	return r.Store.Save(current)
+	return r.Store.Save(reading)
 }
 
 var (
+	// ErrReadingExists is the error used for indicating attempt to
+	// enter a duplicated record to the store. In this context it signals
+	// that water level reading for given sensor and time is already recorded.
 	ErrReadingExists = errors.New("duplicated sensor entry")
-	ErrNoReading     = errors.New("reading entry doesn't exist")
+
+	// ErrNoReading is the error used for indicating that the given
+	// reading does not yet exist in the store.
+	ErrNoReading = errors.New("reading entry doesn't exist")
 )
