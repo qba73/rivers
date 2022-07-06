@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -106,9 +107,11 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 		return nil, err
 	}
 	var res response
+
 	if err := c.sendRequestJSON(req, &res); err != nil {
 		return nil, err
 	}
+
 	var readings []StationWaterLevelReading
 	for _, p := range res.Features {
 		if p.Properties.SensorRef != sensorTypeLevel {
@@ -280,7 +283,8 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("User-Agent", c.UserAgent)
-	res, err := c.HTTPClient.Do(req)
+
+	res, err := c.sendRequestWithBackoff(req)
 	if err != nil {
 		return err
 	}
@@ -296,17 +300,36 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 	return json.NewDecoder(res.Body).Decode(&v)
 }
 
+func (c *Client) sendRequestWithBackoff(req *http.Request) (*http.Response, error) {
+	var res *http.Response
+	var err error
+	res, err = c.HTTPClient.Do(req)
+	base, cap := time.Second, time.Minute
+	for backoff := base; err != nil; backoff <<= 1 {
+		if backoff > cap {
+			backoff = cap
+		}
+		jitter := rand.Int63n(int64(backoff * 3))
+		for range time.NewTicker(time.Duration(jitter)).C {
+		}
+		res, err = c.HTTPClient.Do(req)
+	}
+	return res, err
+}
+
 func (c *Client) requestWaterLevelCSV(req *http.Request) ([]WaterLevelReading, error) {
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
-	res, err := c.HTTPClient.Do(req)
+
+	res, err := c.sendRequestWithBackoff(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+
+	if err := checkResponseStatusCode(res); err != nil {
+		return nil, err
 	}
 	return ReadWaterLevelCSV(res.Body)
 }
@@ -315,13 +338,15 @@ func (c *Client) requestWaterTemperatureCSV(req *http.Request) ([]WaterTemperatu
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
-	res, err := c.HTTPClient.Do(req)
+
+	res, err := c.sendRequestWithBackoff(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+
+	if err := checkResponseStatusCode(res); err != nil {
+		return nil, err
 	}
 	return ReadWaterTemperatureCSV(res.Body)
 }
@@ -330,15 +355,24 @@ func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]WaterLevelRead
 	req.Header.Set("Content-Type", "text/csv")
 	req.Header.Set("Accept", "text/csv")
 	req.Header.Set("User-Agent", c.UserAgent)
-	res, err := c.HTTPClient.Do(req)
+
+	res, err := c.sendRequestWithBackoff(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+
+	if err := checkResponseStatusCode(res); err != nil {
+		return nil, err
 	}
 	return ReadGroupCSV(res.Body)
+}
+
+func checkResponseStatusCode(res *http.Response) error {
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+	return nil
 }
 
 // toMillimeters takes a string representing a float value
