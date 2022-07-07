@@ -5,9 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"database/sql"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3" // DB diver for SQLite3
 	"github.com/qba73/rivers"
 )
 
@@ -148,9 +150,15 @@ func TestAdd_DoesNotAddDuplicateReadings(t *testing.T) {
 	}
 }
 
-func newTestDB(stmtPopulateData string, t *testing.T) *sqlx.DB {
-	db := sqlx.MustConnect("sqlite3", ":memory:")
-	_, err := db.Exec(waterLevelSchema)
+func newTestDB(stmtPopulateData string, t *testing.T) *sql.DB {
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
+		t.Fatal(err)
+	}
+	_, err = db.Exec(waterLevelSchema)
 	if err != nil {
 		t.Fatal(err)
 	}

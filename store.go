@@ -1,9 +1,5 @@
 package rivers
 
-import (
-	_ "github.com/mattn/go-sqlite3"
-)
-
 // Store is the interface that wraps Save,
 // GetLastReadingForStationID and List methods.
 type Store interface {

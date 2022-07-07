@@ -55,9 +55,8 @@ func LoadWaterLevelCSV(path string) ([]WaterLevelReading, error) {
 	return ReadWaterLevelCSV(f)
 }
 
-// ReadCSV knows how to read a csv file containing
-// readings from a gauge in a format:
-// timestamp,level
+// ReadWaterLevelCSV knows how to read a csv file containing
+// readings from a gauge in a format: timestamp,level
 func ReadWaterLevelCSV(r io.Reader) ([]WaterLevelReading, error) {
 	var levels []WaterLevelReading
 	csvreader := csv.NewReader(r)

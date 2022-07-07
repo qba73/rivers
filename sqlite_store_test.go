@@ -6,6 +6,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/qba73/rivers"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestSQLStore_RetrievesLastReadingForGivenStation(t *testing.T) {
