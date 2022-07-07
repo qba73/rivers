@@ -310,8 +310,7 @@ func (c *Client) sendRequestWithBackoff(req *http.Request) (*http.Response, erro
 			backoff = cap
 		}
 		jitter := rand.Int63n(int64(backoff * 3))
-		for range time.NewTicker(time.Duration(jitter)).C {
-		}
+		time.Sleep(base + time.Duration(jitter))
 		res, err = c.HTTPClient.Do(req)
 	}
 	return res, err

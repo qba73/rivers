@@ -65,7 +65,6 @@ func NewPuller(opts ...option) (*Puller, error) {
 func (p *Puller) Run() error {
 	p.Log.Printf("puller : Start water levels puller with interval: %s", p.Interval)
 	for range time.NewTicker(p.Interval).C {
-		// todo: implement re-try
 		p.Log.Println("puller : Pull latest water levels")
 		stationReadings, err := p.Client.GetLatestWaterLevels()
 		if err != nil {
