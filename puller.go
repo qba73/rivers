@@ -62,7 +62,7 @@ func NewPuller(opts ...option) (*Puller, error) {
 	return &p, nil
 }
 
-func (p *Puller) Run() error {
+func (p *Puller) RunPeriodically() error {
 	p.Log.Printf("puller : Start water levels puller with interval: %s", p.Interval)
 	for range time.NewTicker(p.Interval).C {
 		p.Log.Println("puller : Pull latest water levels")
@@ -105,7 +105,7 @@ func RunPuller() {
 		panic(err)
 	}
 
-	if err := p.Run(); err != nil {
+	if err := p.RunPeriodically(); err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
