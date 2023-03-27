@@ -42,7 +42,6 @@ test: ## Run unit tests locally
 # MODULES
 tidy: ## Run go mod tidy and vendor
 	go mod tidy
-	go mod vendor
 
 # Rivers API
 
@@ -55,9 +54,6 @@ clean: ## Remove docker container if exist
 testdocker: ## Run unittests inside a container
 	docker run -w /app -v ${ROOT}:/app ${GO_DOCKER_IMAGE} go test ./... -coverprofile=${GO_TEST_OUTFILE}
 	docker run -w /app -v ${ROOT}:/app ${GO_DOCKER_IMAGE} go tool cover -html=${GO_TEST_OUTFILE} -o ${GO_HTML_COV}
-
-lint: ## Run linter inside container
-	docker run --rm -v ${ROOT}:/data cytopia/golint .
 
 # Custom logic for code climate
 _before-cc:
