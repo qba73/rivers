@@ -1,14 +1,13 @@
 package testhelper
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
 
-// TmpFile knows hwo to create temporary file for testing.
+// TmpFile creates temporary file for testing.
 func TmpFile(t *testing.T, dirname, filename string) *os.File {
-	file, err := ioutil.TempFile(dirname, filename)
+	file, err := os.CreateTemp(dirname, filename)
 	if err != nil {
 		t.Fatalf("failure to create a temporary test file: %s", err)
 	}
