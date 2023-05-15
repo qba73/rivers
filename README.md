@@ -5,7 +5,7 @@
 
 ## rivers
 
-```rivers``` is a Go library and a cli utility for reading water level and temperature data from stations located in rivers in Ireland. It allows to get data from more than 450 sensors located in 28 rivers.  
+```rivers``` is a Go client library and a CLI utility for reading water level and water temperature data from stations located in rivers in Ireland. The tool reads data from more than 450 sensors located in 28 rivers.  
 
 ## Using the Go library
 Import the library using:
