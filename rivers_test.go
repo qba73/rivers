@@ -1,75 +1,47 @@
-//go:build !integration
-// +build !integration
-
 package rivers_test
 
 import (
-	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/qba73/rivers"
-	"github.com/qba73/rivers/testhelper"
 )
 
-func setup(t *testing.T) *os.File {
-	file := testhelper.TmpTextFile(t, "", "data.csv", `datetime,value
-2021-02-10 13:00,1.772
-2021-02-10 13:15,1.771
-2021-02-10 13:30,1.769
-2021-02-10 13:45,1.769
-2021-02-10 14:00,1.768`)
+func TestLoadCSV_LoadsExistingFile(t *testing.T) {
+	t.Parallel()
 
-	t.Cleanup(func() {
-		os.Remove(file.Name())
-	})
-	return file
-}
-
-func TestLoadCSV(t *testing.T) {
-	tt := []struct {
-		name        string
-		filePath    string
-		want        int
-		expectedErr bool
-	}{
-		{name: "load correct file", filePath: "testdata/data.csv", want: 96, expectedErr: false},
-		{name: "load not existing file", filePath: "testdata/notexisting.csv", want: 0, expectedErr: true},
+	got, err := rivers.LoadWaterLevelCSV("testdata/data.csv")
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			got, err := rivers.LoadWaterLevelCSV(tc.filePath)
-			if (err != nil) != tc.expectedErr {
-				t.Fatalf("%s, LoadCSV(%q) failed, error: %v", tc.name, tc.filePath, err)
-			}
+	gotRows := len(got)
+	wantRows := 96
 
-			if !tc.expectedErr && (tc.want != len(got)) {
-				t.Errorf("%s, LoadCSV(%q) got: %v, want: %d", tc.name, tc.filePath, got, tc.want)
-			}
-		})
+	if wantRows != gotRows {
+		t.Errorf("want %d, got %v", wantRows, gotRows)
+	}
+}
+
+func TestLoadCSV_FailsOnNotExistingFile(t *testing.T) {
+	t.Parallel()
+	_, err := rivers.LoadWaterLevelCSV("testdata/notexisting.csv")
+	if err == nil {
+		t.Error("want error on not existing file")
 	}
 }
 
 func TestReadCSV(t *testing.T) {
-	file := setup(t)
-
-	csvFile, err := os.Open(file.Name())
-	if err != nil {
-		t.Fatalf("can't read csv data: %s", err)
-	}
-
-	data, err := rivers.ReadWaterLevelCSV(csvFile)
+	got, err := rivers.ReadWaterLevelCSV(strings.NewReader(stationData))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	wantLen := 5
-	if wantLen != len(data) {
-		t.Errorf("want %d items, got %d", wantLen, len(data))
+	if wantLen != len(got) {
+		t.Errorf("want %d items, got %d", wantLen, len(got))
 	}
 
 	wantTimestamp, err := time.Parse(time.RFC3339, "2021-02-10T13:00:00Z")
@@ -84,8 +56,8 @@ func TestReadCSV(t *testing.T) {
 		Value:     wantValue,
 	}
 
-	if !cmp.Equal(want, data[0]) {
-		t.Errorf(cmp.Diff(want, data[0]))
+	if !cmp.Equal(want, got[0]) {
+		t.Errorf(cmp.Diff(want, got[0]))
 	}
 }
 
@@ -213,4 +185,11 @@ var (
 	invalidGroupInputHeaderOnly    = `Datetime,John's Bridge Nore,Dinin Bridge,Brownsbarn,Mount Juliet`
 	invalidGroupInputOneColumnOnly = `Datetime
 2021-06-15 22:00`
+
+	stationData = `datetime,value
+2021-02-10 13:00,1.772
+2021-02-10 13:15,1.771
+2021-02-10 13:30,1.769
+2021-02-10 13:45,1.769
+2021-02-10 14:00,1.768`
 )

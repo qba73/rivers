@@ -41,7 +41,12 @@ type response struct {
 	}
 }
 
-// Sensor holds data from a station.
+type errResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// Sensor represents a sensor installed in a station.
 type Sensor struct {
 	StationID   string `json:"station_id"`
 	StationName string `json:"station_name"`
@@ -52,8 +57,7 @@ type Sensor struct {
 	RegionID    string `json:"region_id"`
 }
 
-// Station represents a station with
-// multiple sensors.
+// Station represents a station with multiple sensors.
 type Station struct {
 	ID         string   `json:"id"`
 	Name       string   `json:"name"`
@@ -62,11 +66,6 @@ type Station struct {
 	Lat        float64  `json:"lat"`
 	Long       float64  `json:"long"`
 	Sensors    []Sensor `json:"sensors"`
-}
-
-type errResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
 }
 
 // SensorReading represents data received from a sensor.
@@ -228,7 +227,8 @@ func (c *Client) GetMonthTemperature(stationID string) ([]WaterTemperatureReadin
 }
 
 // GetGroupWaterLevel returns water level readings for
-// stations that belong to provided groupID.
+// stations that belong to the given groupID.
+//
 // The value of roupID should be between 1 and 28.
 func (c *Client) GetGroupWaterLevel(groupID int) ([]StationWaterLevelReading, error) {
 	if groupID < 1 || groupID > 28 {
@@ -244,8 +244,8 @@ func (c *Client) GetGroupWaterLevel(groupID int) ([]StationWaterLevelReading, er
 	if err != nil {
 		return nil, err
 	}
-	var readings []StationWaterLevelReading
 
+	var readings []StationWaterLevelReading
 	for _, reading := range groupReadings {
 		station := StationWaterLevelReading{
 			Name:       reading.Name,
@@ -279,7 +279,7 @@ func (c *Client) urlTemperature(stationID, period string) (string, error) {
 	return fmt.Sprintf("%s/data/%s/%s_000%v.csv", c.BaseURL, period, stationID, tempSensor), nil
 }
 
-func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
+func (c *Client) sendRequestJSON(req *http.Request, v any) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("User-Agent", c.UserAgent)
@@ -301,10 +301,9 @@ func (c *Client) sendRequestJSON(req *http.Request, v interface{}) error {
 }
 
 func (c *Client) sendRequestWithBackoff(req *http.Request) (*http.Response, error) {
-	var res *http.Response
-	var err error
-	res, err = c.HTTPClient.Do(req)
-	base, cap := time.Second, time.Minute
+	res, err := c.HTTPClient.Do(req)
+	base := time.Second
+	cap := time.Minute
 	for backoff := base; err != nil; backoff <<= 1 {
 		if backoff > cap {
 			backoff = cap
@@ -367,6 +366,9 @@ func (c *Client) sendStationGroupRequestCSV(req *http.Request) ([]WaterLevelRead
 	return ReadGroupCSV(res.Body)
 }
 
+// checkResponseStatusCode takes http Respopnse and validates
+// HTTP response status code.
+// It errors if the status code is not 2xx or 3xx.
 func checkResponseStatusCode(res *http.Response) error {
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
@@ -374,10 +376,10 @@ func checkResponseStatusCode(res *http.Response) error {
 	return nil
 }
 
-// toMillimeters takes a string representing a float value
-// of water level sensor reading in meters and converts
-// it to integer representing water level in millimeters.
-// It errors if the input string does not represent a float value.
+// toMillimeters is a helper func that takes a string representing a float value
+// of water level sensor reading in meters and converts it to integer representing
+// water level in millimeters.
+// It errors if the input string does not represent float value.
 func toMillimeters(s string) (int, error) {
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil {
@@ -386,11 +388,18 @@ func toMillimeters(s string) (int, error) {
 	return int(v * 1000), nil
 }
 
-// fromStrToInt takes a string representing stationID and
-// returns stationID as int (with trimmed leading zeros).
+// fromStrToInt is a helper func that takes a string representing
+// stationID and returns stationID as int (with trimmed leading zeros).
 func fromStrToInt(s string) (int, error) {
 	st := strings.TrimLeft(s, "0")
 	return strconv.Atoi(st)
+}
+
+func writeReadingsTo(w io.Writer, readings []StationWaterLevelReading) {
+	for _, reading := range readings {
+		fmt.Fprintf(w, "time: %s, station: %s, id: %d, level: %d\n",
+			reading.Readtime, reading.Name, reading.StationID, reading.WaterLevel)
+	}
 }
 
 // GetLatestWaterLevels returns latests readings from all stations.
@@ -407,13 +416,6 @@ func RunCLI() {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
-	printReadings(os.Stdout, readings)
+	writeReadingsTo(os.Stdout, readings)
 	os.Exit(0)
-}
-
-func printReadings(w io.Writer, readings []StationWaterLevelReading) {
-	for _, reading := range readings {
-		fmt.Fprintf(w, "time: %s, station: %s, id: %d, level: %d\n",
-			reading.Readtime, reading.Name, reading.StationID, reading.WaterLevel)
-	}
 }

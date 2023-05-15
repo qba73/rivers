@@ -16,8 +16,8 @@ const (
 	gaugeTimeFormat = "2006-01-02 15:04"
 )
 
-// Reading represents water level recorded
-// by a gauge at the particular time.
+// WaterLevelReading holds information about water level
+// recorded by a gauge at the given time.
 type WaterLevelReading struct {
 	Name      string
 	RefID     string
@@ -25,23 +25,13 @@ type WaterLevelReading struct {
 	Value     int
 }
 
+// WaterTemperatureReading holds information about water temperature
+// recorded by gauge at the given time.
 type WaterTemperatureReading struct {
 	Name      string
 	RefID     string
 	Timestamp time.Time
 	Value     float64
-}
-
-type VoltageReading struct {
-	Name      string
-	RefID     string
-	Timestamp time.Time
-	Value     float64
-}
-
-// String prints out information about the reading.
-func (rd WaterLevelReading) String() string {
-	return fmt.Sprintf("Name: %s, Time: %s, Value: %v", rd.Name, rd.Timestamp, rd.Value)
 }
 
 // LoadWaterLevelCSV knows how to open and read given csv file.
@@ -56,39 +46,40 @@ func LoadWaterLevelCSV(path string) ([]WaterLevelReading, error) {
 }
 
 // ReadWaterLevelCSV knows how to read a csv file containing
-// readings from a gauge in a format: timestamp,level
+// readings from a single gauge.
+//
+// The func expects file header in the format: timestamp,level
 func ReadWaterLevelCSV(r io.Reader) ([]WaterLevelReading, error) {
 	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
 	// before start looping through the lines (records).
 	if _, err := csvreader.Read(); err != nil {
-		return nil, errors.New("error when reading csv file")
+		return nil, errors.New("reading csv file")
 	}
 	records, err := csvreader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
-	levels := make([]WaterLevelReading, len(records))
-	for i, r := range records {
+	levels := make([]WaterLevelReading, 0, len(records))
+	for _, r := range records {
 		level, err := processWaterLevelRecord(r)
 		if err != nil {
 			return nil, fmt.Errorf("error processing csv record: %v", err)
 		}
-		levels[i] = level
+		levels = append(levels, level)
 	}
 	return levels, nil
 }
 
-// ReadWaterTemperatureCSV knows how to read a csv file containing
-// readings from a gauge in a format: `timestamp,value`. The value
-// represents temp in Celsius.
+// ReadWaterTemperatureCSV reads a csv file containing data from a gauge.
+// Epected format: `timestamp,value` where the `value` represents temperature in Celsius.
 func ReadWaterTemperatureCSV(r io.Reader) ([]WaterTemperatureReading, error) {
 	csvreader := csv.NewReader(r)
 	// We are not interested in the CSV header. We read it
 	// before start looping through the lines (records).
 	if _, err := csvreader.Read(); err != nil {
-		return nil, errors.New("error when reading csv file")
+		return nil, errors.New("reading csv file")
 	}
 
 	records, err := csvreader.ReadAll()
@@ -96,13 +87,13 @@ func ReadWaterTemperatureCSV(r io.Reader) ([]WaterTemperatureReading, error) {
 		return nil, err
 	}
 
-	levels := make([]WaterTemperatureReading, len(records))
-	for i, r := range records {
+	levels := make([]WaterTemperatureReading, 0, len(records))
+	for _, r := range records {
 		level, err := processWaterTempRecord(r)
 		if err != nil {
-			return nil, fmt.Errorf("error processing csv record: %v", err)
+			return nil, fmt.Errorf("processing csv record: %v", err)
 		}
-		levels[i] = level
+		levels = append(levels, level)
 	}
 	return levels, nil
 }
