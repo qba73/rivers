@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func main() {
-	readings, err := rivers.GetLatestWaterLevels()
+	readings, err := rivers.GetLatestWaterLevels(context.Background())
 	if err != nil {
 		log.Println(err)
 	}

@@ -24,7 +24,6 @@ func (r *ReadingsRepo) List() ([]StationWaterLevelReading, error) {
 
 // GetLastReadingForStationID retrieves latest water level reading for given station id.
 func (r *ReadingsRepo) GetLastReadingForStationID(stationID int) (StationWaterLevelReading, error) {
-	// could do more here!
 	return r.Store.GetLastReadingForStationID(stationID)
 }
 

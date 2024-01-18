@@ -1,11 +1,13 @@
 package rivers
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 )
 
@@ -13,9 +15,6 @@ type option func(*Puller) error
 
 func WithInterval(duration string) option {
 	return func(p *Puller) error {
-		if duration == "" {
-			return errors.New("setting up pulling interval: nil duration")
-		}
 		duration, err := time.ParseDuration(duration)
 		if err != nil {
 			return fmt.Errorf("setting up pulling interval: %w", err)
@@ -62,11 +61,11 @@ func NewPuller(opts ...option) (*Puller, error) {
 	return &p, nil
 }
 
-func (p *Puller) RunPeriodically() error {
+func (p *Puller) RunPeriodically(ctx context.Context) error {
 	p.Log.Printf("puller : Start water levels puller with interval: %s", p.Interval)
 	for range time.NewTicker(p.Interval).C {
 		p.Log.Println("puller : Pull latest water levels")
-		stationReadings, err := p.Client.GetLatestWaterLevels()
+		stationReadings, err := p.Client.GetLatestWaterLevels(ctx)
 		if err != nil {
 			return fmt.Errorf("retriving water level data: %w", err)
 		}
@@ -105,7 +104,10 @@ func RunPuller() {
 		panic(err)
 	}
 
-	if err := p.RunPeriodically(); err != nil {
+	ctx, shutdown := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer shutdown()
+
+	if err := p.RunPeriodically(ctx); err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}

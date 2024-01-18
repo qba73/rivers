@@ -1,6 +1,7 @@
 package rivers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"time"
@@ -100,13 +102,12 @@ func NewClient() *Client {
 }
 
 // GetLatestWaterLevels returns latest water level readings from sensors.
-func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
+func (c *Client) GetLatestWaterLevels(ctx context.Context) ([]StationWaterLevelReading, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/geojson/latest", c.BaseURL), nil)
 	if err != nil {
 		return nil, err
 	}
 	var res response
-
 	if err := c.sendRequestJSON(req, &res); err != nil {
 		return nil, err
 	}
@@ -144,12 +145,12 @@ func (c *Client) GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
 
 // GetDayLevel knows how to return water level readings recorded for
 // last 24hr period for the given stationID number.
-func (c *Client) GetDayLevel(stationID string) ([]WaterLevelReading, error) {
+func (c *Client) GetDayLevel(ctx context.Context, stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "day")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -158,12 +159,12 @@ func (c *Client) GetDayLevel(stationID string) ([]WaterLevelReading, error) {
 
 // GetWeekLevel knows how to return water level readings recorded for
 // last week period for the given stationID number.
-func (c *Client) GetWeekLevel(stationID string) ([]WaterLevelReading, error) {
+func (c *Client) GetWeekLevel(ctx context.Context, stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "week")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -172,12 +173,12 @@ func (c *Client) GetWeekLevel(stationID string) ([]WaterLevelReading, error) {
 
 // GetMonthLevel knows how to return water level readings recorded for
 // last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthLevel(stationID string) ([]WaterLevelReading, error) {
+func (c *Client) GetMonthLevel(ctx context.Context, stationID string) ([]WaterLevelReading, error) {
 	url, err := c.urlLevel(stationID, "month")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -186,12 +187,12 @@ func (c *Client) GetMonthLevel(stationID string) ([]WaterLevelReading, error) {
 
 // GetDayTemperature knows how to return water temperature
 // recorded for last 24hr period for the given stationID number.
-func (c *Client) GetDayTemperature(stationID string) ([]WaterTemperatureReading, error) {
+func (c *Client) GetDayTemperature(ctx context.Context, stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "day")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -200,12 +201,12 @@ func (c *Client) GetDayTemperature(stationID string) ([]WaterTemperatureReading,
 
 // GetWeekTemperature knows how to return water temperature
 // recorded for last week period for the given stationID number.
-func (c *Client) GetWeekTemperature(stationID string) ([]WaterTemperatureReading, error) {
+func (c *Client) GetWeekTemperature(ctx context.Context, stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "week")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -214,12 +215,12 @@ func (c *Client) GetWeekTemperature(stationID string) ([]WaterTemperatureReading
 
 // GetMonthTemperature knows how to return water temperature
 // recorded for last 4 weeks period for the given stationID number.
-func (c *Client) GetMonthTemperature(stationID string) ([]WaterTemperatureReading, error) {
+func (c *Client) GetMonthTemperature(ctx context.Context, stationID string) ([]WaterTemperatureReading, error) {
 	url, err := c.urlTemperature(stationID, "month")
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -230,12 +231,12 @@ func (c *Client) GetMonthTemperature(stationID string) ([]WaterTemperatureReadin
 // stations that belong to the given groupID.
 //
 // The value of roupID should be between 1 and 28.
-func (c *Client) GetGroupWaterLevel(groupID int) ([]StationWaterLevelReading, error) {
+func (c *Client) GetGroupWaterLevel(ctx context.Context, groupID int) ([]StationWaterLevelReading, error) {
 	if groupID < 1 || groupID > 28 {
 		return nil, fmt.Errorf("invalid groupID %d, expecting value between 1 and 28", groupID)
 	}
 	url := fmt.Sprintf("%s/data/group/group_%d.csv", c.BaseURL, groupID)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -405,13 +406,15 @@ func writeReadingsTo(w io.Writer, readings []StationWaterLevelReading) {
 // GetLatestWaterLevels returns latests readings from all stations.
 //
 // This func uses default rivers' client under the hood.
-func GetLatestWaterLevels() ([]StationWaterLevelReading, error) {
-	return NewClient().GetLatestWaterLevels()
+func GetLatestWaterLevels(ctx context.Context) ([]StationWaterLevelReading, error) {
+	return NewClient().GetLatestWaterLevels(ctx)
 }
 
 // RunCLI executes program and prints out latest recorded water levels.
 func RunCLI() {
-	readings, err := GetLatestWaterLevels()
+	ctx, shutdown := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer shutdown()
+	readings, err := GetLatestWaterLevels(ctx)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)

@@ -1,6 +1,7 @@
 package rivers_test
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +20,7 @@ func TestRiversClient_GetsLatestWaterLevelReadings(t *testing.T) {
 	client := rivers.NewClient()
 	client.BaseURL = ts.URL
 
-	got, err := client.GetLatestWaterLevels()
+	got, err := client.GetLatestWaterLevels(context.Background())
 	if err != nil {
 		t.Fatalf("GetLatest() got error %v", err)
 	}
@@ -65,7 +66,7 @@ func TestRiversClient_GetsDayWaterLevels(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetDayLevel(stationID)
+	got, err := client.GetDayLevel(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("client.GetDayLevel(%q) got error %v", stationID, err)
 	}
@@ -102,7 +103,7 @@ func TestRiversClient_GetsWeekWaterLevels(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetWeekLevel(stationID)
+	got, err := client.GetWeekLevel(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("client.GetWeekLevel(%q) got error %v", stationID, err)
 	}
@@ -139,7 +140,7 @@ func TestRiversClient_GetsMonthWaterLevel(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetMonthLevel(stationID)
+	got, err := client.GetMonthLevel(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("client.GetMonthLevel(%q) got error %v", stationID, err)
 	}
@@ -172,7 +173,7 @@ func TestRiversClient_GetsDayWaterTemperature(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetDayTemperature(stationID)
+	got, err := client.GetDayTemperature(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("GetDayTemperature(%q) got error %v", stationID, err)
 	}
@@ -205,7 +206,7 @@ func TestRiversClient_GetsWeekWaterTemperature(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetWeekTemperature(stationID)
+	got, err := client.GetWeekTemperature(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("GetWeekTemperature(%q) got error %v", stationID, err)
 	}
@@ -238,7 +239,7 @@ func TestRiversClient_GetsMonthWaterTemperature(t *testing.T) {
 	}
 
 	stationID := "010104"
-	got, err := client.GetMonthTemperature(stationID)
+	got, err := client.GetMonthTemperature(context.Background(), stationID)
 	if err != nil {
 		t.Fatalf("GetMonthTemperature(%q) got error %v", stationID, err)
 	}
@@ -279,7 +280,7 @@ func TestRiversClient_RetrievesGroupWaterLevel(t *testing.T) {
 	}
 
 	groupID := 1
-	got, err := client.GetGroupWaterLevel(groupID)
+	got, err := client.GetGroupWaterLevel(context.Background(), groupID)
 	if err != nil {
 		t.Fatal(err)
 	}
